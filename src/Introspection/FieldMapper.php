@@ -73,6 +73,12 @@ class FieldMapper
             return FieldType::Date;
         }
 
+        if ($field instanceof TextInput && $field->isNumeric()) {
+            return in_array('integer', $field->getValidationRules(), true)
+                ? FieldType::Integer
+                : FieldType::Number;
+        }
+
         if ($this->isInstanceOfAny($field, [MarkdownEditor::class, RichEditor::class, Textarea::class, TextInput::class])) {
             return FieldType::String;
         }

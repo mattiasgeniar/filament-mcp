@@ -277,7 +277,8 @@ Revoke a token by setting `revoked_at` on its `filament_mcp_tokens` row.
 This is v1 and intentionally scoped:
 
 - **Text-like fields only for writes.** Text, textarea, markdown/rich editors,
-  selects, toggles/checkboxes and date pickers are mapped. File uploads, custom
+  selects, toggles/checkboxes, numeric inputs (mapped to `integer`/`number`) and
+  date pickers are mapped. File uploads, custom
   components, and fields the form would not persist (`disabled()`,
   `dehydrated(false)`) are skipped, so the writable surface matches what a real
   save writes. Reads union the infolist and these form fields (see "Reads vs

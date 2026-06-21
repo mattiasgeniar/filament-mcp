@@ -28,6 +28,8 @@ class ArticleResource extends Resource
             ]),
             Toggle::make('published'),
             DateTimePicker::make('published_at'),
+            TextInput::make('views')->integer(),
+            TextInput::make('rating')->numeric(),
             FileUpload::make('cover'),
             TextInput::make('internal_ref')->disabled(),
             TextInput::make('computed_value')->dehydrated(false),

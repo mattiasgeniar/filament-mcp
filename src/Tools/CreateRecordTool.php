@@ -38,6 +38,7 @@ class CreateRecordTool extends ResourceTool
         // validated fields, which act as the allowlist regardless of $fillable.
         $record->forceFill($this->prepare($validated, null));
         $record->save();
+        $record->refresh();
 
         return $this->json([
             'success' => true,

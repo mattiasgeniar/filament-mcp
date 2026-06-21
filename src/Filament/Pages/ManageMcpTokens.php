@@ -111,36 +111,48 @@ class ManageMcpTokens extends Page implements HasTable
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('generate')
-                ->label('Generate token')
-                ->icon('heroicon-m-plus')
-                ->modalHeading('Generate a new token')
-                ->modalSubmitActionLabel('Generate')
-                ->schema([
-                    TextInput::make('name')
-                        ->label('Name')
-                        ->helperText('A label to recognise this token later.')
-                        ->required()
-                        ->maxLength(255)
-                        ->default('Web'),
-                ])
-                ->action(function (array $data): void {
-                    ['plainText' => $plainText] = FilamentMcpToken::issue($this->currentUser(), $data['name']);
-
-                    $this->generatedToken = $plainText;
-
-                    $this->replaceMountedAction('revealToken');
-                }),
-            Action::make('revealToken')
-                ->modalHeading('Copy your new token')
-                ->modalIcon('heroicon-o-key')
-                ->modalContent(fn (): View => app(ViewFactory::class)->make('filament-mcp::filament.modals.reveal-token', [
-                    'token' => $this->generatedToken,
-                ]))
-                ->modalSubmitAction(false)
-                ->modalCancelActionLabel('Done')
-                ->hidden(),
+            $this->generateAction(),
         ];
+    }
+
+    public function generateAction(): Action
+    {
+        return Action::make('generate')
+            ->label('Generate token')
+            ->icon('heroicon-m-plus')
+            ->modalHeading('Generate a new token')
+            ->modalSubmitActionLabel('Generate')
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->helperText('A label to recognise this token later.')
+                    ->required()
+                    ->maxLength(255)
+                    ->default('Web'),
+            ])
+            ->action(function (array $data): void {
+                ['plainText' => $plainText] = FilamentMcpToken::issue($this->currentUser(), $data['name']);
+
+                $this->generatedToken = $plainText;
+
+                $this->replaceMountedAction('revealToken');
+            });
+    }
+
+    /**
+     * Reached only via the generate action's replaceMountedAction() call, so it
+     * is defined as a method (resolvable by name) rather than a header button.
+     */
+    public function revealTokenAction(): Action
+    {
+        return Action::make('revealToken')
+            ->modalHeading('Copy your new token')
+            ->modalIcon('heroicon-o-key')
+            ->modalContent(fn (): View => app(ViewFactory::class)->make('filament-mcp::filament.modals.reveal-token', [
+                'token' => $this->generatedToken,
+            ]))
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Done');
     }
 
     /**

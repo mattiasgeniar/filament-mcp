@@ -18,3 +18,6 @@ All notable changes to `filament-mcp` will be documented in this file.
 - A `describe_resources` discovery tool that maps the exposed resources, operations, actions, and fields.
 - A `read_fields` config option to declare readable fields explicitly for resources whose view schema lives on a page.
 - A `FilamentMcpPlugin` that adds an MCP token page to a panel, where each user generates and revokes their own personal tokens (gated by the same authorization rule as the server).
+- Numeric form inputs (`->numeric()`, `->integer()`) are exposed as JSON Schema `number`/`integer` instead of strings.
+- Package migrations run automatically after `composer require`, so `php artisan migrate` is all that is needed.
+- Create and update tools refresh the record before returning it, so database defaults and casts are reflected in the response.

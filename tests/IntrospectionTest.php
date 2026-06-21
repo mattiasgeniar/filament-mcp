@@ -10,7 +10,7 @@ it('maps a resource form to typed scalar fields', function () {
     expect($schema->singularName())->toBe('article');
     expect($schema->pluralName())->toBe('articles');
     expect($schema->fields->map(fn ($field) => $field->name)->all())
-        ->toBe(['title', 'slug', 'body', 'status', 'published', 'published_at']);
+        ->toBe(['title', 'slug', 'body', 'status', 'published', 'published_at', 'views', 'rating']);
 
     expect($schema->field('title')->type)->toBe(FieldType::String);
     expect($schema->field('title')->required)->toBeTrue();
@@ -18,6 +18,8 @@ it('maps a resource form to typed scalar fields', function () {
     expect($schema->field('published_at')->type)->toBe(FieldType::Date);
     expect($schema->field('status')->type)->toBe(FieldType::Enum);
     expect($schema->field('status')->enumOptions)->toBe(['draft', 'published']);
+    expect($schema->field('views')->type)->toBe(FieldType::Integer);
+    expect($schema->field('rating')->type)->toBe(FieldType::Number);
 });
 
 it('skips file upload and unsupported components', function () {
