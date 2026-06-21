@@ -2,6 +2,8 @@
 
 namespace Mattiasgeniar\FilamentMcp\Introspection;
 
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Infolists\Components\Entry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -44,7 +46,7 @@ class InfolistIntrospector
     }
 
     /**
-     * @param  array<int, Component>  $components
+     * @param  array<int, Component|Action|ActionGroup>  $components
      * @param  Collection<int, ReadableField>  $fields
      */
     private function walk(array $components, Collection $fields): void
@@ -57,6 +59,10 @@ class InfolistIntrospector
                     $fields->push($field);
                 }
 
+                continue;
+            }
+
+            if (! $component instanceof Component) {
                 continue;
             }
 

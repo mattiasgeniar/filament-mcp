@@ -2,6 +2,8 @@
 
 namespace Mattiasgeniar\FilamentMcp\Introspection;
 
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Field;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
@@ -64,7 +66,7 @@ class ResourceIntrospector
     }
 
     /**
-     * @param  array<int, Component>  $components
+     * @param  array<int, Component|Action|ActionGroup>  $components
      * @param  Collection<int, FieldDefinition>  $fields
      * @param  array<int, string>  $skipped
      */
@@ -82,6 +84,10 @@ class ResourceIntrospector
 
                 $fields->push($definition);
 
+                continue;
+            }
+
+            if (! $component instanceof Component) {
                 continue;
             }
 

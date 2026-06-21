@@ -20,7 +20,9 @@ class IssueTokenCommand extends Command
 
     public function handle(): int
     {
-        $user = $this->resolveUser($this->argument('user'));
+        $identifier = $this->argument('user');
+
+        $user = is_string($identifier) ? $this->resolveUser($identifier) : null;
 
         if ($user === null) {
             $this->error('No user found for that id or email.');
@@ -34,7 +36,9 @@ class IssueTokenCommand extends Command
             return self::FAILURE;
         }
 
-        ['plainText' => $plainText] = FilamentMcpToken::issue($user, (string) $this->option('name'));
+        $name = $this->option('name');
+
+        ['plainText' => $plainText] = FilamentMcpToken::issue($user, is_string($name) ? $name : 'CLI');
 
         $this->info('MCP token issued. Store it now, it will not be shown again:');
         $this->newLine();
