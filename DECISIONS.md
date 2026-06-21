@@ -75,6 +75,35 @@ Two independent reviews ran against the package. No critical issues. Fixed:
 Deferred (tracked as open questions below): audit-argument redaction (#4) and
 audit-table pruning (#3).
 
+## Competitive landscape (researched 2026-06-21)
+
+How other admin panels approach MCP / AI:
+
+- **Filament** — no first-party runtime MCP. `kirschbaum/laravel-loop-filament`
+  is the only shipped one: list/describe/query + **bulk actions** (no per-record
+  CRUD), built on Laravel Loop (not `laravel/mcp`), beta. Other "filament mcp"
+  packages are **build-time** doc servers (help agents write Filament code).
+- **Backpack v7** — announced an MCP server ("read, edit, delete data via any AI
+  agent, automate workflows") but it's "coming in v7.x", no public config/auth
+  detail yet. Closest in vision to us.
+- **MoonShine 4** — AI is build-time/in-panel (Forty-Five assistant, MoonVibe
+  generator), not an external MCP server exposing resources.
+- **Nova / Orchid** — no resource-exposing MCP.
+
+Where we already lead: per-record CRUD, official `laravel/mcp`, fail-closed auth
++ policy enforcement + `getEloquentQuery` scoping + audit, form-writes/infolist-reads.
+
+Ideas worth adopting (roadmap, ordered):
+1. **Table-aware list** — support the resource table's search, filters, sorting,
+   and pagination in `list_*` (laravel-loop has querying; it's a real Filament
+   capability we're missing).
+2. **Actions as tools** — expose selected Filament actions / bulk actions per
+   resource (Backpack "workflows", laravel-loop bulk actions).
+3. **Relation managers** — expose a resource's relations for read (and maybe write).
+4. **Discovery tool** — a `describe`/`list_resources` tool for agent self-discovery.
+5. **Permission-system integration** — first-class Filament Shield / spatie
+   permission mapping, beyond the single gate + policies.
+
 ## Open questions (for review)
 
 1. **Default abilities.** A bare resource class currently enables delete too. Do
