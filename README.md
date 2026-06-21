@@ -218,6 +218,18 @@ is only visible to users your authorization gate/callback allows, the same rule
 that guards the server. Customise the navigation, or turn the page off entirely,
 under the `ui` config key.
 
+> **Using a custom Filament theme?** Tailwind only compiles the classes it finds
+> in your theme's scanned sources, so register this package's views or its styles
+> get purged and the page renders unstyled. Add to your theme's CSS (e.g.
+> `resources/css/filament/admin/theme.css`) and rebuild:
+>
+> ```css
+> @source '../../../../vendor/mattiasgeniar/filament-mcp/resources/views/**/*';
+> ```
+>
+> The default Filament theme already includes them, so this is only needed with a
+> custom theme.
+
 ## Connecting an MCP client
 
 The server speaks the streamable HTTP transport. Point your client at the URL and
