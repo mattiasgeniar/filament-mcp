@@ -3,11 +3,13 @@
 namespace Mattiasgeniar\FilamentMcp\Server;
 
 use InvalidArgumentException;
+use Mattiasgeniar\FilamentMcp\Actions\ResourceAction;
 use Mattiasgeniar\FilamentMcp\Contracts\PreparesRecordData;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceIntrospector;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceSchema;
 use Mattiasgeniar\FilamentMcp\Introspection\SchemaCompiler;
 use Mattiasgeniar\FilamentMcp\Support\ResourceAuthorizer;
+use Mattiasgeniar\FilamentMcp\Tools\ActionTool;
 use Mattiasgeniar\FilamentMcp\Tools\CreateRecordTool;
 use Mattiasgeniar\FilamentMcp\Tools\DeleteRecordTool;
 use Mattiasgeniar\FilamentMcp\Tools\GetRecordTool;
@@ -57,9 +59,33 @@ class ToolFactory
             if ($abilities['delete'] ?? ($write ?? true)) {
                 $tools[] = $this->tool(DeleteRecordTool::class, $schema, $prepare);
             }
+
+            /** @var array<string, mixed> $actions */
+            $actions = $abilities['actions'] ?? [];
+
+            foreach ($actions as $actionKey => $actionClass) {
+                $tools[] = new ActionTool($schema, $this->authorizer, $actionKey, $this->resolveAction($actionClass));
+            }
         }
 
         return $tools;
+    }
+
+    private function resolveAction(mixed $action): ResourceAction
+    {
+        if ($action instanceof ResourceAction) {
+            return $action;
+        }
+
+        $resolved = app($action);
+
+        if (! $resolved instanceof ResourceAction) {
+            throw new InvalidArgumentException(
+                'A filament-mcp [actions] entry must extend ' . ResourceAction::class . '.'
+            );
+        }
+
+        return $resolved;
     }
 
     /**

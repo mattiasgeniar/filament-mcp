@@ -112,6 +112,40 @@ class PreparePageData implements PreparesRecordData
 }
 ```
 
+### Custom actions
+
+Expose a custom per-record action as its own tool (the guardrailed way to mirror
+a Filament action or bulk action). Add an `actions` map and point each entry at a
+class extending [`ResourceAction`](src/Actions/ResourceAction.php):
+
+```php
+\App\Filament\Resources\PostResource::class => [
+    'actions' => [
+        'publish' => \App\Mcp\PublishPost::class, // becomes the publish_post tool
+    ],
+],
+```
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Mattiasgeniar\FilamentMcp\Actions\ResourceAction;
+
+class PublishPost extends ResourceAction
+{
+    public function description(): string
+    {
+        return 'Publish the post.';
+    }
+
+    public function handle(Model $record, array $arguments): mixed
+    {
+        $record->update(['published' => true]);
+
+        return ['published' => true];
+    }
+}
+```
+
 ### Other options
 
 | Key            | Default         | Purpose                                            |

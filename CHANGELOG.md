@@ -14,3 +14,4 @@ All notable changes to `filament-mcp` will be documented in this file.
 - Optional per-resource data preparers via the `PreparesRecordData` contract.
 - Read tools driven by the resource infolist (falling back to the form), so view-only resources are readable.
 - `list_*` tools support search, field filters, sorting, and pagination.
+- Custom per-record actions exposed as tools via the `actions` config and the `ResourceAction` base class.
