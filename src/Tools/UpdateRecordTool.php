@@ -21,14 +21,14 @@ class UpdateRecordTool extends ResourceTool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id' => $schema->integer()->description("The id of the {$this->resource->singularName()} to update.")->required(),
+            'id' => $schema->string()->description("The id of the {$this->resource->singularName()} to update.")->required(),
             ...$this->compiler->inputProperties($schema, $this->resource->fields, forUpdate: true),
         ];
     }
 
     protected function run(Request $request): Response
     {
-        $rules = ['id' => ['required', 'integer']] + $this->compiler->validationRules($this->resource->fields, forUpdate: true);
+        $rules = ['id' => ['required']] + $this->compiler->validationRules($this->resource->fields, forUpdate: true);
 
         $validated = $request->validate($rules);
 

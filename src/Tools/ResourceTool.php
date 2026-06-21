@@ -5,6 +5,7 @@ namespace Mattiasgeniar\FilamentMcp\Tools;
 use BackedEnum;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -33,14 +34,13 @@ abstract class ResourceTool extends BaseTool
     final public function handle(Request $request): Response
     {
         $start = hrtime(true);
-        $success = true;
+        $success = false;
 
         try {
-            return $this->run($request);
-        } catch (Throwable $exception) {
-            $success = false;
+            $response = $this->run($request);
+            $success = ! $response->isError();
 
-            throw $exception;
+            return $response;
         } finally {
             $this->recordToolCall($request, $success, $start);
         }
@@ -81,9 +81,20 @@ abstract class ResourceTool extends BaseTool
         return $this->resource->modelClass;
     }
 
-    protected function findRecord(int $id): ?Model
+    /**
+     * The resource's base query, so the host app's tenant scopes, soft-delete
+     * filters, and any getEloquentQuery() modifications apply here too.
+     *
+     * @return Builder<Model>
+     */
+    protected function query(): Builder
     {
-        return $this->modelClass()::query()->find($id);
+        return ($this->resource->resourceClass)::getEloquentQuery();
+    }
+
+    protected function findRecord(int | string $id): ?Model
+    {
+        return $this->query()->find($id);
     }
 
     /**

@@ -33,6 +33,12 @@ class FieldMapper
 
     private function mapField(Field $field): ?FieldDefinition
     {
+        // Skip fields the form would never persist, so the MCP surface matches
+        // what a real save writes (display-only and non-dehydrated fields).
+        if ($field->isDisabled() || ! $field->isDehydrated()) {
+            return null;
+        }
+
         $type = $this->typeFor($field);
 
         if ($type === null) {

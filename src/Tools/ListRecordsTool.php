@@ -41,7 +41,7 @@ class ListRecordsTool extends ResourceTool
         $modelClass = $this->modelClass();
         $keyName = (new $modelClass)->getKeyName();
 
-        $records = $modelClass::query()
+        $records = $this->query()
             ->latest($keyName)
             ->limit($validated['limit'] ?? 25)
             ->get();

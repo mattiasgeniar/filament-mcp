@@ -23,14 +23,14 @@ class DeleteRecordTool extends ResourceTool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id' => $schema->integer()->description("The id of the {$this->resource->singularName()} to delete.")->required(),
+            'id' => $schema->string()->description("The id of the {$this->resource->singularName()} to delete.")->required(),
         ];
     }
 
     protected function run(Request $request): Response
     {
         $validated = $request->validate([
-            'id' => ['required', 'integer'],
+            'id' => ['required'],
         ]);
 
         $record = $this->findRecord($validated['id']);

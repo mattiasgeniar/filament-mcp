@@ -23,14 +23,14 @@ class GetRecordTool extends ResourceTool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'id' => $schema->integer()->description("The id of the {$this->resource->singularName()}.")->required(),
+            'id' => $schema->string()->description("The id of the {$this->resource->singularName()}.")->required(),
         ];
     }
 
     protected function run(Request $request): Response
     {
         $validated = $request->validate([
-            'id' => ['required', 'integer'],
+            'id' => ['required'],
         ]);
 
         $record = $this->findRecord($validated['id']);

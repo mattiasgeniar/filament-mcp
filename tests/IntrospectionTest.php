@@ -26,3 +26,12 @@ it('skips file upload and unsupported components', function () {
     expect($schema->fields->map(fn ($field) => $field->name)->all())->not->toContain('cover');
     expect($schema->skippedFields)->toContain('cover');
 });
+
+it('skips disabled and non-dehydrated fields so the surface matches a real save', function () {
+    $schema = (new ResourceIntrospector)->for(ArticleResource::class);
+
+    $names = $schema->fields->map(fn ($field) => $field->name)->all();
+
+    expect($names)->not->toContain('internal_ref', 'computed_value');
+    expect($schema->skippedFields)->toContain('internal_ref', 'computed_value');
+});

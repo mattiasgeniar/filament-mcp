@@ -2,6 +2,7 @@
 
 namespace Mattiasgeniar\FilamentMcp\Server;
 
+use InvalidArgumentException;
 use Mattiasgeniar\FilamentMcp\Contracts\PreparesRecordData;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceIntrospector;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceSchema;
@@ -53,7 +54,7 @@ class ToolFactory
                 $tools[] = $this->tool(UpdateRecordTool::class, $schema, $prepare);
             }
 
-            if ($abilities['delete'] ?? true) {
+            if ($abilities['delete'] ?? ($write ?? true)) {
                 $tools[] = $this->tool(DeleteRecordTool::class, $schema, $prepare);
             }
         }
@@ -85,7 +86,15 @@ class ToolFactory
             return $prepare;
         }
 
-        return app($prepare);
+        $resolved = app($prepare);
+
+        if (! $resolved instanceof PreparesRecordData) {
+            throw new InvalidArgumentException(
+                'A filament-mcp [prepare] class must implement ' . PreparesRecordData::class . '.'
+            );
+        }
+
+        return $resolved;
     }
 
     /**

@@ -29,6 +29,8 @@ class ArticleResource extends Resource
             Toggle::make('published'),
             DateTimePicker::make('published_at'),
             FileUpload::make('cover'),
+            TextInput::make('internal_ref')->disabled(),
+            TextInput::make('computed_value')->dehydrated(false),
         ]);
     }
 

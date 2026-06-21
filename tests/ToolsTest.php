@@ -84,6 +84,35 @@ it('applies a configured data preparer before saving', function () {
     expect($created['record']['title'])->toBe('LOWERCASE');
 });
 
+it('does not generate a delete tool when write is disabled', function () {
+    config(['filament-mcp.resources' => [
+        ArticleResource::class => ['write' => false],
+    ]]);
+
+    $names = collect(app(ToolFactory::class)->make())->map(fn ($tool) => $tool->name())->all();
+
+    expect($names)->toContain('list_articles', 'get_article');
+    expect($names)->not->toContain('create_article', 'update_article', 'delete_article');
+});
+
+it('accepts a string id so UUID-keyed models work', function () {
+    $created = callMcpTool('create_article', ['title' => 'String id', 'body' => 'Body.']);
+
+    $fetched = callMcpTool('get_article', ['id' => (string) $created['record']['id']]);
+
+    expect($fetched['title'])->toBe('String id');
+});
+
+it('records a failed tool call as unsuccessful in the audit log', function () {
+    try {
+        callMcpTool('create_article', ['body' => 'No title']);
+    } catch (ValidationException) {
+        // expected
+    }
+
+    expect(FilamentMcpToolCall::query()->latest('id')->first()->success)->toBeFalse();
+});
+
 it('records every tool call in the audit log', function () {
     callMcpTool('create_article', ['title' => 'Audited', 'body' => 'Body.']);
 

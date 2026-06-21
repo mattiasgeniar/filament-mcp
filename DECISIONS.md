@@ -50,6 +50,23 @@ with the reasoning; open questions are collected at the bottom for us to settle.
 - The route is registered in `packageBooted()` via `Mcp::web()` on the configured
   path with `[Authenticate, ...config middleware]`.
 
+## Security review outcome
+
+Two independent reviews ran against the package. No critical issues. Fixed:
+
+- **`write => false` now also disables `delete`** (previously delete ignored the
+  `write` shorthand, the dangerous direction).
+- **Disabled / non-dehydrated fields are skipped**, so the MCP surface can't write
+  or read columns the form itself would never persist.
+- **Queries go through `Resource::getEloquentQuery()`** (list/get/update/delete),
+  so tenant scopes and soft-delete filters apply, no cross-scope access.
+- **String/UUID primary keys** are supported (ids are no longer integer-only).
+- **`prepare` classes are validated** to implement `PreparesRecordData`.
+- **Audit log records denials/failures as `success = false`** (was always true).
+
+Deferred (tracked as open questions below): audit-argument redaction (#4) and
+audit-table pruning (#3).
+
 ## Open questions (for review)
 
 1. **Default abilities.** A bare resource class currently enables delete too. Do
