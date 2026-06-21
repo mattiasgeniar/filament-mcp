@@ -57,6 +57,9 @@
         "test:lint": "pint --test"
     },
     "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        },
         "laravel": {
             "providers": [
                 "Mattiasgeniar\\FilamentMcp\\FilamentMcpServiceProvider"
@@ -70,6 +73,6 @@
             "phpstan/extension-installer": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
