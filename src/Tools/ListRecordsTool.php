@@ -3,10 +3,13 @@
 namespace Mattiasgeniar\FilamentMcp\Tools;
 
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+use Mattiasgeniar\FilamentMcp\Introspection\ReadableField;
 
 #[IsReadOnly]
 class ListRecordsTool extends ResourceTool
@@ -18,13 +21,18 @@ class ListRecordsTool extends ResourceTool
 
     public function description(): string
     {
-        return "List {$this->resource->pluralName()}, most recent first.";
+        return "List {$this->resource->pluralName()} with optional search, field filters, sorting, and pagination.";
     }
 
     public function schema(JsonSchema $schema): array
     {
         return [
-            'limit' => $schema->integer()->description('Maximum records to return (default 25, max 100).'),
+            'search' => $schema->string()->description('Case-insensitive substring match across the readable fields.'),
+            'filters' => $schema->object()->description('Exact-match filters keyed by field name. Array values match any of the listed values.'),
+            'sort' => $schema->string()->enum($this->sortableColumns())->description('Field to sort by.'),
+            'direction' => $schema->string()->enum(['asc', 'desc'])->description('Sort direction (default desc).'),
+            'page' => $schema->integer()->description('Page number (default 1).'),
+            'per_page' => $schema->integer()->description('Records per page (default 25, max 100).'),
         ];
     }
 
@@ -35,20 +43,91 @@ class ListRecordsTool extends ResourceTool
         }
 
         $validated = $request->validate([
-            'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'search' => ['sometimes', 'string'],
+            'filters' => ['sometimes', 'array'],
+            'sort' => ['sometimes', 'string', Rule::in($this->sortableColumns())],
+            'direction' => ['sometimes', Rule::in(['asc', 'desc'])],
+            'page' => ['sometimes', 'integer', 'min:1'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
-        $modelClass = $this->modelClass();
-        $keyName = (new $modelClass)->getKeyName();
+        $query = $this->query();
 
-        $records = $this->query()
-            ->latest($keyName)
-            ->limit($validated['limit'] ?? 25)
-            ->get();
+        $this->applySearch($query, $validated['search'] ?? null);
+        $this->applyFilters($query, $validated['filters'] ?? []);
+
+        $query->orderBy(
+            $validated['sort'] ?? (new ($this->modelClass()))->getKeyName(),
+            $validated['direction'] ?? 'desc',
+        );
+
+        $perPage = $validated['per_page'] ?? 25;
+        $page = $validated['page'] ?? 1;
+        $total = (clone $query)->count();
+
+        $records = $query->forPage($page, $perPage)->get();
 
         return Response::text((string) json_encode([
-            'count' => $records->count(),
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $perPage,
             'records' => $records->map(fn (Model $model): array => $this->present($model))->all(),
         ], JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * @param  Builder<Model>  $query
+     */
+    private function applySearch(Builder $query, ?string $search): void
+    {
+        if ($search === null || $search === '') {
+            return;
+        }
+
+        $fields = $this->fieldNames();
+
+        $query->where(function (Builder $query) use ($fields, $search): void {
+            foreach ($fields as $field) {
+                $query->orWhere($field, 'like', "%{$search}%");
+            }
+        });
+    }
+
+    /**
+     * @param  Builder<Model>  $query
+     * @param  array<string, mixed>  $filters
+     */
+    private function applyFilters(Builder $query, array $filters): void
+    {
+        $allowed = $this->fieldNames();
+
+        foreach ($filters as $field => $value) {
+            if (! in_array($field, $allowed, true)) {
+                continue;
+            }
+
+            is_array($value)
+                ? $query->whereIn($field, $value)
+                : $query->where($field, $value);
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function fieldNames(): array
+    {
+        return $this->resource->readableFields->map(fn (ReadableField $field): string => $field->name)->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function sortableColumns(): array
+    {
+        return array_values(array_unique([
+            ...$this->fieldNames(),
+            (new ($this->modelClass()))->getKeyName(),
+        ]));
     }
 }

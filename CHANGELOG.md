@@ -12,3 +12,5 @@ All notable changes to `filament-mcp` will be documented in this file.
 - Fail-closed authorization via a `viewFilamentMcp` gate or `FilamentMcp::authorizeUsing()` callback.
 - Per-call audit logging.
 - Optional per-resource data preparers via the `PreparesRecordData` contract.
+- Read tools driven by the resource infolist (falling back to the form), so view-only resources are readable.
+- `list_*` tools support search, field filters, sorting, and pagination.
