@@ -6,23 +6,30 @@
         Copy this token now. For your security, it will not be shown again.
     </p>
 
-    <div class="flex items-center gap-2">
-        <x-filament::input.wrapper class="flex-1">
-            <x-filament::input
-                type="text"
-                readonly
-                x-ref="token"
-                :value="$token"
+    <x-filament::input.wrapper>
+        <x-slot name="suffix">
+            <x-filament::icon-button
+                x-show="! copied"
+                icon="heroicon-m-clipboard-document"
+                label="Copy to clipboard"
+                color="gray"
+                x-on:click="copied = true; window.navigator.clipboard.writeText($refs.token.value); setTimeout(() => copied = false, 2000)"
             />
-        </x-filament::input.wrapper>
 
-        <x-filament::button
-            color="gray"
-            icon="heroicon-m-clipboard"
-            x-on:click="window.navigator.clipboard.writeText($refs.token.value); copied = true"
-        >
-            <span x-show="! copied">Copy</span>
-            <span x-show="copied" x-cloak>Copied</span>
-        </x-filament::button>
-    </div>
+            <x-filament::icon-button
+                x-show="copied"
+                x-cloak
+                icon="heroicon-m-check"
+                label="Copied"
+                color="success"
+            />
+        </x-slot>
+
+        <x-filament::input
+            type="text"
+            readonly
+            x-ref="token"
+            :value="$token"
+        />
+    </x-filament::input.wrapper>
 </div>
