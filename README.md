@@ -218,17 +218,38 @@ is only visible to users your authorization gate/callback allows, the same rule
 that guards the server. Customise the navigation, or turn the page off entirely,
 under the `ui` config key.
 
-> **Using a custom Filament theme?** Tailwind only compiles the classes it finds
-> in your theme's scanned sources, so register this package's views or its styles
-> get purged and the page renders unstyled. Add to your theme's CSS (e.g.
-> `resources/css/filament/admin/theme.css`) and rebuild:
->
-> ```css
-> @source '../../../../vendor/mattiasgeniar/filament-mcp/resources/views/**/*';
-> ```
->
-> The default Filament theme already includes them, so this is only needed with a
-> custom theme.
+If your panel uses a custom theme, do the one-time step in
+[Using a custom Filament theme](#using-a-custom-filament-theme) so the page is styled.
+
+## Using a custom Filament theme
+
+The token page is built from Blade views that ship in this package. Filament
+compiles a panel's CSS with Tailwind, which only generates the utility classes it
+finds in the sources you tell it to scan. A **custom** theme does not scan
+`vendor/`, so this package's classes are purged and the page renders unstyled
+(text and the token field collapse onto one cramped row instead of stacking).
+
+Register the package's views as a Tailwind source in your theme's CSS, then
+rebuild your assets:
+
+```css
+/* resources/css/filament/<your-panel>/theme.css */
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../vendor/mattiasgeniar/filament-mcp/resources/views/**/*'; /* add this */
+```
+
+```bash
+npm run build   # or: vite build
+```
+
+Path depth: the `@source` is relative to the theme CSS file. From the default
+`resources/css/filament/<panel>/theme.css` location that is four levels up
+(`../../../../`) to reach the project root, matching the Filament import above.
+
+You only need this with a custom theme. The **default** Filament theme already
+compiles every class the package uses, so it works with no extra setup.
 
 ## Connecting an MCP client
 
