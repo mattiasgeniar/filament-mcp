@@ -88,4 +88,34 @@ return [
         //
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Panel UI
+    |--------------------------------------------------------------------------
+    |
+    | A Filament page where users who can access the panel manage their own
+    | personal MCP tokens (generate and revoke). Register the plugin on your
+    | panel to enable it:
+    |
+    |     use Mattiasgeniar\FilamentMcp\Filament\FilamentMcpPlugin;
+    |
+    |     $panel->plugin(FilamentMcpPlugin::make());
+    |
+    | The page is only visible to users your authorization gate/callback allows,
+    | the same rule that guards the MCP server itself. Set `enabled` to false to
+    | hide the page even where the plugin is registered.
+    |
+    */
+
+    'ui' => [
+        'enabled' => true,
+
+        'navigation' => [
+            'group' => 'MCP',
+            'label' => 'Tokens',
+            'icon' => 'heroicon-o-key',
+            'sort' => null,
+        ],
+    ],
+
 ];

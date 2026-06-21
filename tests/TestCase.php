@@ -18,6 +18,7 @@ use Livewire\LivewireServiceProvider;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\FilamentMcpServiceProvider;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\User;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Providers\TestPanelProvider;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource;
 use Orchestra\Testbench\TestCase as Orchestra;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
@@ -50,6 +51,7 @@ class TestCase extends Orchestra
             TablesServiceProvider::class,
             WidgetsServiceProvider::class,
             FilamentMcpServiceProvider::class,
+            TestPanelProvider::class,
         ];
     }
 
