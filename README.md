@@ -196,6 +196,28 @@ php artisan filament-mcp:token user@example.com --name="My laptop"
 The command refuses to issue a token to a user who is not authorized (override
 with `--force`).
 
+### In the panel
+
+Users can manage their own tokens from a Filament page instead of the CLI.
+Register the plugin on your panel:
+
+```php
+use Mattiasgeniar\FilamentMcp\Filament\FilamentMcpPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ...
+        ->plugin(FilamentMcpPlugin::make());
+}
+```
+
+This adds an **MCP → Tokens** page where each user generates and revokes their
+own personal tokens (the plaintext is shown once, with a copy button). The page
+is only visible to users your authorization gate/callback allows, the same rule
+that guards the server. Customise the navigation, or turn the page off entirely,
+under the `ui` config key.
+
 ## Connecting an MCP client
 
 The server speaks the streamable HTTP transport. Point your client at the URL and
@@ -255,15 +277,17 @@ Revoke a token by setting `revoked_at` on its `filament_mcp_tokens` row.
 This is v1 and intentionally scoped:
 
 - **Text-like fields only for writes.** Text, textarea, markdown/rich editors,
-  selects, toggles/checkboxes and date pickers are mapped. File uploads, custom
-  components, and fields the form would not persist (`disabled()`,
-  `dehydrated(false)`) are skipped, so the writable surface matches what a real
-  save writes. Reads union the infolist and these form fields (see "Reads vs
+  selects, toggles/checkboxes, numeric inputs (mapped to `integer`/`number`) and
+  date pickers are mapped. File uploads, custom components, and fields the form
+  would not persist (`disabled()`, `dehydrated(false)`) are skipped, so the
+  writable surface matches what a real save writes. Reads union the infolist and
+  these form fields (see "Reads vs
   writes" above).
 - **Closure-based form validation is not enforced** at the MCP layer; database
   constraints and model events remain the backstop.
 - **Page-level logic** is honored only through a `prepare` class.
-- **Token management is CLI-only.** A panel UI is planned for v2.
+- **Token management** is available both from the CLI and, when the plugin is
+  registered, as a self-service Filament page per user.
 
 ## Testing
 

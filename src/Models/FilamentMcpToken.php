@@ -73,6 +73,15 @@ class FilamentMcpToken extends Model
         return hash('sha256', $plainText);
     }
 
+    public function revoke(): void
+    {
+        if ($this->revoked_at !== null) {
+            return;
+        }
+
+        $this->update(['revoked_at' => now()]);
+    }
+
     public function markAsUsed(): void
     {
         if ($this->last_used_at?->gt(now()->subMinute())) {

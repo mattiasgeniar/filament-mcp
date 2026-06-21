@@ -73,6 +73,8 @@ class SchemaCompiler
     {
         return match ($field->type) {
             FieldType::Boolean => $schema->boolean(),
+            FieldType::Integer => $schema->integer(),
+            FieldType::Number => $schema->number(),
             FieldType::Date => $schema->string(),
             FieldType::Enum => $field->enumOptions !== null
                 ? $schema->string()->enum($field->enumOptions)

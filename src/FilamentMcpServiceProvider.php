@@ -18,15 +18,16 @@ class FilamentMcpServiceProvider extends PackageServiceProvider
     {
         $package->name(static::$name)
             ->hasConfigFile()
+            ->hasViews()
             ->hasMigrations([
                 'create_filament_mcp_tokens_table',
                 'create_filament_mcp_tool_calls_table',
             ])
+            ->runsMigrations()
             ->hasCommand(IssueTokenCommand::class)
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
                     ->publishConfigFile()
-                    ->publishMigrations()
                     ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('mattiasgeniar/filament-mcp');
             });

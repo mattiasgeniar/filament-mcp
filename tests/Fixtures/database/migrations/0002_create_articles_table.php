@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->boolean('published')->default(false);
             $table->timestamp('published_at')->nullable();
+            $table->unsignedInteger('views')->default(0);
+            $table->decimal('rating', 3, 1)->nullable();
             $table->timestamps();
         });
     }

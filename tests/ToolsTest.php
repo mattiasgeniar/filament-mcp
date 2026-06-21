@@ -95,6 +95,13 @@ it('does not generate a delete tool when write is disabled', function () {
     expect($names)->not->toContain('create_article', 'update_article', 'delete_article');
 });
 
+it('reflects database defaults in the created record by refreshing it', function () {
+    $result = callMcpTool('create_article', ['title' => 'Defaults', 'body' => 'b', 'status' => 'draft']);
+
+    expect($result['record']['views'])->toBe(0);
+    expect($result['record']['published'])->toBeFalse();
+});
+
 it('accepts a string id so UUID-keyed models work', function () {
     $created = callMcpTool('create_article', ['title' => 'String id', 'body' => 'Body.']);
 
