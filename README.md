@@ -194,6 +194,17 @@ are driven by the resource's **infolist** (what Filament shows on the view page)
 falling back to the form when a resource has no infolist. This means view-only
 resources, which have no form but do have an infolist, are still fully readable.
 
+When a resource builds its view schema on the **page** (a `ViewRecord`) rather
+than the resource, introspection finds nothing to read. List the readable
+attributes explicitly with `read_fields`:
+
+```php
+\App\Filament\Resources\RunResource::class => [
+    'write' => false,
+    'read_fields' => ['check_id', 'result', 'started_at', 'ended_at'],
+],
+```
+
 ## Security model
 
 1. **Token** — every request needs a valid, non-revoked bearer token.

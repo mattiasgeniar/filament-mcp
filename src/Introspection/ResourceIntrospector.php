@@ -17,8 +17,9 @@ class ResourceIntrospector
 
     /**
      * @param  class-string  $resourceClass
+     * @param  array<int, string>  $readFields  Explicit readable field override (e.g. for view-only resources whose schema lives on a page).
      */
-    public function for(string $resourceClass): ResourceSchema
+    public function for(string $resourceClass, array $readFields = []): ResourceSchema
     {
         $schema = $resourceClass::form(Schema::make(SchemaContainer::make()));
 
@@ -31,22 +32,28 @@ class ResourceIntrospector
             resourceClass: $resourceClass,
             modelClass: $resourceClass::getModel(),
             fields: $fields,
-            readableFields: $this->readableFields($resourceClass, $fields),
+            readableFields: $this->readableFields($resourceClass, $fields, $readFields),
             skippedFields: $skipped,
         );
     }
 
     /**
-     * Readable fields come from the resource's infolist (what Filament shows on
-     * the view page). When it has no infolist, fall back to the form fields, so
-     * read-only and editable resources both expose something useful.
+     * Readable fields come from, in order: an explicit config override, the
+     * resource's infolist (what Filament shows on the view page), then the form
+     * fields. So editable, view-only, and page-driven resources all expose
+     * something useful.
      *
      * @param  class-string  $resourceClass
      * @param  Collection<int, FieldDefinition>  $fields
+     * @param  array<int, string>  $readFields
      * @return Collection<int, ReadableField>
      */
-    private function readableFields(string $resourceClass, Collection $fields): Collection
+    private function readableFields(string $resourceClass, Collection $fields, array $readFields): Collection
     {
+        if ($readFields !== []) {
+            return collect($readFields)->map(fn (string $name): ReadableField => new ReadableField($name));
+        }
+
         $fromInfolist = $this->infolist->for($resourceClass);
 
         if ($fromInfolist->isNotEmpty()) {

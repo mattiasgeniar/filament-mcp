@@ -2,6 +2,7 @@
 
 use Mattiasgeniar\FilamentMcp\Introspection\InfolistIntrospector;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceIntrospector;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Article;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Report;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ReportResource;
@@ -24,6 +25,27 @@ it('falls back to form fields for readable fields when there is no infolist', fu
 
     expect($schema->readableFields->map(fn ($field) => $field->name)->all())
         ->toBe($schema->fields->map(fn ($field) => $field->name)->all());
+});
+
+it('lets config override the readable fields explicitly', function () {
+    $schema = (new ResourceIntrospector)->for(ArticleResource::class, ['title', 'status']);
+
+    expect($schema->readableFields->map(fn ($field) => $field->name)->all())->toBe(['title', 'status']);
+});
+
+it('exposes only the configured read_fields through the get tool', function () {
+    config(['filament-mcp.resources' => [
+        ArticleResource::class => ['read_fields' => ['title']],
+    ]]);
+    actingAsMcpUser();
+
+    $article = Article::query()->create(['title' => 'Visible', 'body' => 'hidden', 'status' => 'draft']);
+
+    $fetched = callMcpTool('get_article', ['id' => $article->id]);
+
+    expect($fetched)->toHaveKey('title');
+    expect($fetched)->not->toHaveKey('body');
+    expect($fetched)->not->toHaveKey('status');
 });
 
 it('exposes infolist fields through the get tool on a view-only resource', function () {

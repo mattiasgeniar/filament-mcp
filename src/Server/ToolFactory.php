@@ -37,7 +37,7 @@ class ToolFactory
         $tools = [];
 
         foreach ($this->resources() as $resourceClass => $abilities) {
-            $schema = $this->introspector->for($resourceClass);
+            $schema = $this->introspector->for($resourceClass, $abilities['read_fields'] ?? []);
             $prepare = $this->resolvePrepare($abilities['prepare'] ?? null);
             $operations = $this->operations($abilities);
 
@@ -82,7 +82,7 @@ class ToolFactory
         $described = [];
 
         foreach ($this->resources() as $resourceClass => $abilities) {
-            $schema = $this->introspector->for($resourceClass);
+            $schema = $this->introspector->for($resourceClass, $abilities['read_fields'] ?? []);
 
             /** @var array<string, mixed> $actions */
             $actions = $abilities['actions'] ?? [];
