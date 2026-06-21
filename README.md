@@ -56,13 +56,13 @@ Everything lives in `config/filament-mcp.php`. The two things you must set are
 
 Authorization is fail-closed: until you define it, nobody can connect. Pick one:
 
-**A `viewFilamentMcp` gate** (recommended, cache-safe):
+**A `useFilamentMcp` gate** (recommended, cache-safe):
 
 ```php
 // app/Providers/AppServiceProvider.php
 use Illuminate\Support\Facades\Gate;
 
-Gate::define('viewFilamentMcp', fn ($user) => $user->is_admin);
+Gate::define('useFilamentMcp', fn ($user) => $user->is_admin);
 ```
 
 **Or a callback** (handy when the rule does not belong in a gate):

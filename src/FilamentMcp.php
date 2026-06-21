@@ -24,7 +24,7 @@ class FilamentMcp
 
     /**
      * Decide whether the given user may use the MCP server. Resolution order:
-     * the registered closure, then a `viewFilamentMcp` gate, then deny.
+     * the registered closure, then a `useFilamentMcp` gate, then deny.
      * The default is fail-closed: with neither configured, nobody gets in.
      */
     public static function authorize(Authenticatable $user): bool
@@ -33,8 +33,8 @@ class FilamentMcp
             return (bool) (self::$authUsing)($user);
         }
 
-        if (Gate::has('viewFilamentMcp')) {
-            return Gate::forUser($user)->allows('viewFilamentMcp');
+        if (Gate::has('useFilamentMcp')) {
+            return Gate::forUser($user)->allows('useFilamentMcp');
         }
 
         return false;

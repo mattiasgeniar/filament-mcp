@@ -27,7 +27,7 @@ scopes their abilities.
 ### Configuration is cache-safe (no closures in config)
 - `php artisan config:cache` must keep working, so the config file holds only
   plain values. Authorization is therefore **not** a config closure. Instead:
-  - a `viewFilamentMcp` Gate (recommended), or
+  - a `useFilamentMcp` Gate (recommended), or
   - `FilamentMcp::authorizeUsing(Closure)` registered in a service provider.
 - Default is **fail-closed**: with neither set, every request is denied.
 - Per-resource `prepare` hooks are **class names** implementing `PreparesRecordData`,
