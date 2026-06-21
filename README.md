@@ -14,16 +14,18 @@ authorization callback you control.
 
 ## Why
 
-Filament's own AI tooling helps you *write* Filament code. This package does the
-opposite: it lets an agent *operate* a running panel. Unlike the read/bulk-action
-oriented alternatives, it generates real per-record CRUD tools on the official
-[`laravel/mcp`](https://github.com/laravel/mcp) server, enforces your policies,
-and is configured almost entirely from a single config file.
+This package lets an AI agent do everything a human could already do in the
+Filament dashboard. Where Filament's own AI tooling helps you *write* Filament
+code, this does the opposite: it lets an agent *operate* a running panel. Unlike
+the read/bulk-action oriented alternatives, it generates real per-record CRUD
+tools on the official [`laravel/mcp`](https://github.com/laravel/mcp) server,
+enforces your policies, and is configured almost entirely from a single config
+file.
 
 - **Generated, not hand-written.** Each resource's form is introspected, so a new
   field shows up as a tool argument automatically.
-- **Safe by default.** Access is fail-closed: no one gets in until you say who can.
-- **Honest about scope.** Only text-like fields are exposed (see [Limitations](#limitations)).
+- **Safe by default.** Access is forbidden until you explicitly grant it in the config.
+- **Text fields only.** Only text-like fields are exposed (see [Limitations](#limitations)).
 - **Audited.** Every tool call is recorded.
 
 ## Requirements
@@ -54,7 +56,8 @@ Everything lives in `config/filament-mcp.php`. The two things you must set are
 
 ### 1. Who has access
 
-Authorization is fail-closed: until you define it, nobody can connect. Pick one:
+Access is forbidden until you explicitly grant it in the config; nobody can
+connect until you define who is allowed. Pick one:
 
 **A `useFilamentMcp` gate** (recommended, cache-safe):
 
@@ -77,17 +80,23 @@ FilamentMcp::authorizeUsing(fn ($user) => $user->is_admin);
 
 ```php
 // config/filament-mcp.php
+use App\Filament\Resources\PageResource;
+use App\Filament\Resources\PostResource;
+use App\Mcp\PreparePageData;
+
+// ...
+
 'resources' => [
     // Shorthand: enables list/get/create/update/delete
-    \App\Filament\Resources\PostResource::class,
+    PostResource::class,
 
     // Expanded: scope abilities and attach an optional data preparer
-    \App\Filament\Resources\PageResource::class => [
+    PageResource::class => [
         'read' => true,
         'create' => true,
         'update' => true,
         'delete' => false,
-        'prepare' => \App\Mcp\PreparePageData::class,
+        'prepare' => PreparePageData::class,
     ],
 ],
 ```
@@ -229,7 +238,7 @@ attributes explicitly with `read_fields`:
 ## Security model
 
 1. **Token** — every request needs a valid, non-revoked bearer token.
-2. **Authorization** — the resolved user must pass your gate/callback (fail-closed).
+2. **Authorization** — the resolved user must pass your gate/callback; access is denied until you grant it.
 3. **Policies** — each tool call also respects the model's Filament policy when one
    exists.
 4. **Query scoping** — records are read and written through the resource's
