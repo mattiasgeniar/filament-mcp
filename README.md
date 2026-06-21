@@ -278,10 +278,10 @@ This is v1 and intentionally scoped:
 
 - **Text-like fields only for writes.** Text, textarea, markdown/rich editors,
   selects, toggles/checkboxes, numeric inputs (mapped to `integer`/`number`) and
-  date pickers are mapped. File uploads, custom
-  components, and fields the form would not persist (`disabled()`,
-  `dehydrated(false)`) are skipped, so the writable surface matches what a real
-  save writes. Reads union the infolist and these form fields (see "Reads vs
+  date pickers are mapped. File uploads, custom components, and fields the form
+  would not persist (`disabled()`, `dehydrated(false)`) are skipped, so the
+  writable surface matches what a real save writes. Reads union the infolist and
+  these form fields (see "Reads vs
   writes" above).
 - **Closure-based form validation is not enforced** at the MCP layer; database
   constraints and model events remain the backstop.

@@ -26,12 +26,6 @@ class ManageMcpTokens extends Page implements HasTable
 
     protected string $view = 'filament-mcp::filament.pages.manage-mcp-tokens';
 
-    /**
-     * The one-time plaintext of the token just generated, shown once and then
-     * discarded. Public so the reveal modal can read it within the request.
-     */
-    public ?string $generatedToken = null;
-
     public static function canAccess(): bool
     {
         if (! config('filament-mcp.ui.enabled', true)) {
@@ -66,7 +60,11 @@ class ManageMcpTokens extends Page implements HasTable
     {
         $sort = config('filament-mcp.ui.navigation.sort');
 
-        return $sort === null ? null : (int) $sort;
+        if ($sort === null) {
+            return null;
+        }
+
+        return (int) $sort;
     }
 
     public function getTitle(): string | Htmlable
@@ -133,23 +131,23 @@ class ManageMcpTokens extends Page implements HasTable
             ->action(function (array $data): void {
                 ['plainText' => $plainText] = FilamentMcpToken::issue($this->currentUser(), $data['name']);
 
-                $this->generatedToken = $plainText;
-
-                $this->replaceMountedAction('revealToken');
+                $this->replaceMountedAction('revealToken', ['token' => $plainText]);
             });
     }
 
     /**
      * Reached only via the generate action's replaceMountedAction() call, so it
      * is defined as a method (resolvable by name) rather than a header button.
+     * The plaintext travels as a mounted-action argument, not a persisted
+     * property, so it is dropped the moment the modal is closed.
      */
     public function revealTokenAction(): Action
     {
         return Action::make('revealToken')
             ->modalHeading('Copy your new token')
             ->modalIcon('heroicon-o-key')
-            ->modalContent(fn (): View => app(ViewFactory::class)->make('filament-mcp::filament.modals.reveal-token', [
-                'token' => $this->generatedToken,
+            ->modalContent(fn (array $arguments): View => app(ViewFactory::class)->make('filament-mcp::filament.modals.reveal-token', [
+                'token' => $arguments['token'] ?? '',
             ]))
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Done');
