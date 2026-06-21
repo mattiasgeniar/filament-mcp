@@ -152,6 +152,12 @@ pass the token as a bearer header. For Claude Code (`.mcp.json`):
 Each exposed resource produces `list_*`, `get_*`, `create_*`, `update_*`, and
 `delete_*` tools, named from the model (e.g. `create_post`).
 
+**Reads vs writes.** Writes (`create`/`update`) are driven by the resource's
+**form**, so the agent can only set fields the form allows. Reads (`list`/`get`)
+are driven by the resource's **infolist** (what Filament shows on the view page),
+falling back to the form when a resource has no infolist. This means view-only
+resources, which have no form but do have an infolist, are still fully readable.
+
 ## Security model
 
 1. **Token** — every request needs a valid, non-revoked bearer token.
@@ -168,10 +174,11 @@ Revoke a token by setting `revoked_at` on its `filament_mcp_tokens` row.
 
 This is v1 and intentionally scoped:
 
-- **Text-like fields only.** Text, textarea, markdown/rich editors, selects,
-  toggles/checkboxes and date pickers are mapped. File uploads, custom components,
-  and fields the form would not persist (`disabled()`, `dehydrated(false)`) are
-  skipped, so the exposed surface matches what a real save writes.
+- **Text-like fields only for writes.** Text, textarea, markdown/rich editors,
+  selects, toggles/checkboxes and date pickers are mapped. File uploads, custom
+  components, and fields the form would not persist (`disabled()`,
+  `dehydrated(false)`) are skipped, so the writable surface matches what a real
+  save writes. Reads come from the infolist (see "Reads vs writes" above).
 - **Closure-based form validation is not enforced** at the MCP layer; database
   constraints and model events remain the backstop.
 - **Page-level logic** is honored only through a `prepare` class.

@@ -3,6 +3,14 @@
 Working notes from the initial build. Decisions I made autonomously are recorded
 with the reasoning; open questions are collected at the bottom for us to settle.
 
+## Guiding principle
+
+What is possible via the Filament panel should be possible via MCP, with
+guardrails that let the developer narrow or override what the MCP can do. The
+panel is the source of truth for both shape (forms drive writes, infolists drive
+reads) and access (policies + query scopes), and config opts resources in and
+scopes their abilities.
+
 ## Decisions made
 
 ### Naming & namespace

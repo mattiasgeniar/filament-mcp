@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool as BaseTool;
-use Mattiasgeniar\FilamentMcp\Introspection\FieldDefinition;
+use Mattiasgeniar\FilamentMcp\Introspection\ReadableField;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceSchema;
 use Mattiasgeniar\FilamentMcp\Introspection\SchemaCompiler;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
@@ -117,7 +117,7 @@ abstract class ResourceTool extends BaseTool
     {
         $data = ['id' => $model->getKey()];
 
-        $this->resource->fields->each(function (FieldDefinition $field) use ($model, &$data): void {
+        $this->resource->readableFields->each(function (ReadableField $field) use ($model, &$data): void {
             $data[$field->name] = $this->normalize($model->getAttribute($field->name));
         });
 

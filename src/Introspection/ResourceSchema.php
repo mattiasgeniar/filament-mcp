@@ -11,13 +11,15 @@ class ResourceSchema
     /**
      * @param  class-string  $resourceClass
      * @param  class-string<Model>  $modelClass
-     * @param  Collection<int, FieldDefinition>  $fields
+     * @param  Collection<int, FieldDefinition>  $fields  Writable fields, from the resource form.
+     * @param  Collection<int, ReadableField>  $readableFields  Readable fields, from the infolist (or the form as a fallback).
      * @param  array<int, string>  $skippedFields
      */
     public function __construct(
         public readonly string $resourceClass,
         public readonly string $modelClass,
         public readonly Collection $fields,
+        public readonly Collection $readableFields,
         public readonly array $skippedFields = [],
     ) {}
 

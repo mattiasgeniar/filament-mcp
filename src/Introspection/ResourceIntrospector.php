@@ -4,16 +4,15 @@ namespace Mattiasgeniar\FilamentMcp\Introspection;
 
 use Filament\Forms\Components\Field;
 use Filament\Schemas\Components\Component;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
-use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Collection;
-use Livewire\Component as LivewireComponent;
+use Mattiasgeniar\FilamentMcp\Support\SchemaContainer;
 
 class ResourceIntrospector
 {
     public function __construct(
         private readonly FieldMapper $mapper = new FieldMapper,
+        private readonly InfolistIntrospector $infolist = new InfolistIntrospector,
     ) {}
 
     /**
@@ -21,7 +20,7 @@ class ResourceIntrospector
      */
     public function for(string $resourceClass): ResourceSchema
     {
-        $schema = $resourceClass::form(Schema::make($this->container()));
+        $schema = $resourceClass::form(Schema::make(SchemaContainer::make()));
 
         $fields = collect();
         $skipped = [];
@@ -32,8 +31,29 @@ class ResourceIntrospector
             resourceClass: $resourceClass,
             modelClass: $resourceClass::getModel(),
             fields: $fields,
+            readableFields: $this->readableFields($resourceClass, $fields),
             skippedFields: $skipped,
         );
+    }
+
+    /**
+     * Readable fields come from the resource's infolist (what Filament shows on
+     * the view page). When it has no infolist, fall back to the form fields, so
+     * read-only and editable resources both expose something useful.
+     *
+     * @param  class-string  $resourceClass
+     * @param  Collection<int, FieldDefinition>  $fields
+     * @return Collection<int, ReadableField>
+     */
+    private function readableFields(string $resourceClass, Collection $fields): Collection
+    {
+        $fromInfolist = $this->infolist->for($resourceClass);
+
+        if ($fromInfolist->isNotEmpty()) {
+            return $fromInfolist;
+        }
+
+        return $fields->map(fn (FieldDefinition $field): ReadableField => new ReadableField($field->name, $field->description));
     }
 
     /**
@@ -60,18 +80,5 @@ class ResourceIntrospector
 
             $this->walk($component->getChildComponents(), $fields, $skipped);
         }
-    }
-
-    private function container(): HasSchemas & LivewireComponent
-    {
-        return new class extends LivewireComponent implements HasSchemas
-        {
-            use InteractsWithSchemas;
-
-            public function render(): string
-            {
-                return '';
-            }
-        };
     }
 }
