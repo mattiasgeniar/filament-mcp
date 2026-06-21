@@ -40,10 +40,12 @@ class ResourceIntrospector
     }
 
     /**
-     * Readable fields come from, in order: an explicit config override, the
-     * resource's infolist (what Filament shows on the view page), then the form
-     * fields. So editable, view-only, and page-driven resources all expose
-     * something useful.
+     * Readable fields are the union of the resource's infolist (what Filament
+     * shows on the view page) and its writable form fields, so an agent can
+     * always read back what it can write and still see view-only entries. The
+     * infolist wins on name clashes, keeping its label. An explicit `read_fields`
+     * config override replaces both. Fields the model marks `$hidden` are dropped
+     * later, at read time.
      *
      * @param  class-string  $resourceClass
      * @param  Collection<int, FieldDefinition>  $fields
@@ -56,13 +58,12 @@ class ResourceIntrospector
             return collect($readFields)->map(fn (string $name): ReadableField => new ReadableField($name));
         }
 
-        $fromInfolist = $this->infolist->for($resourceClass);
+        $fromForm = $fields->map(fn (FieldDefinition $field): ReadableField => new ReadableField($field->name, $field->description));
 
-        if ($fromInfolist->isNotEmpty()) {
-            return $fromInfolist;
-        }
-
-        return $fields->map(fn (FieldDefinition $field): ReadableField => new ReadableField($field->name, $field->description));
+        return $this->infolist->for($resourceClass)
+            ->concat($fromForm)
+            ->unique(fn (ReadableField $field): string => $field->name)
+            ->values();
     }
 
     /**

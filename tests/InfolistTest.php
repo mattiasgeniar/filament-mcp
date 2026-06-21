@@ -3,8 +3,10 @@
 use Mattiasgeniar\FilamentMcp\Introspection\InfolistIntrospector;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceIntrospector;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Article;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Profile;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Report;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ProfileResource;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ReportResource;
 
 it('reads field names from a resource infolist, skipping non-scalar entries', function () {
@@ -20,11 +22,31 @@ it('uses the infolist for readable fields on a view-only resource', function () 
     expect($schema->readableFields->map(fn ($field) => $field->name)->all())->toBe(['title', 'summary']);
 });
 
-it('falls back to form fields for readable fields when there is no infolist', function () {
+it('uses the writable form fields for readable fields when there is no infolist', function () {
     $schema = (new ResourceIntrospector)->for(ArticleResource::class);
 
     expect($schema->readableFields->map(fn ($field) => $field->name)->all())
         ->toBe($schema->fields->map(fn ($field) => $field->name)->all());
+});
+
+it('unions the infolist and writable form fields for readable fields', function () {
+    $schema = (new ResourceIntrospector)->for(ProfileResource::class);
+
+    expect($schema->readableFields->map(fn ($field) => $field->name)->all())
+        ->toBe(['name', 'bio', 'secret_token']);
+});
+
+it('drops $hidden attributes from read output even when they are readable fields', function () {
+    config(['filament-mcp.resources' => [ProfileResource::class]]);
+    actingAsMcpUser();
+
+    $profile = Profile::query()->create(['name' => 'Ada', 'bio' => 'Engineer', 'secret_token' => 'sk_live_123']);
+
+    $fetched = callMcpTool('get_profile', ['id' => $profile->id]);
+
+    expect($fetched['name'])->toBe('Ada');
+    expect($fetched['bio'])->toBe('Engineer');
+    expect($fetched)->not->toHaveKey('secret_token');
 });
 
 it('lets config override the readable fields explicitly', function () {

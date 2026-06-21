@@ -12,7 +12,7 @@ All notable changes to `filament-mcp` will be documented in this file.
 - Fail-closed authorization via a `useFilamentMcp` gate or `FilamentMcp::authorizeUsing()` callback.
 - Per-call audit logging.
 - Optional per-resource data preparers via the `PreparesRecordData` contract.
-- Read tools driven by the resource infolist (falling back to the form), so view-only resources are readable.
+- Read tools expose the union of the resource infolist and its writable form fields, so an agent can always read back what it can write; attributes the model marks `$hidden` are dropped from read output.
 - `list_*` tools support search, field filters, sorting, and pagination.
 - Custom per-record actions exposed as tools via the `actions` config and the `ResourceAction` base class. Actions are policy-gated (`ability()`, default `update`) and only arguments declared in `rules()` reach the handler.
 - A `describe_resources` discovery tool that maps the exposed resources, operations, actions, and fields.

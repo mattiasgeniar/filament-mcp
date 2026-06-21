@@ -128,21 +128,26 @@ abstract class ResourceTool extends BaseTool
      */
     protected function present(Model $model): array
     {
+        $hidden = $model->getHidden();
         $data = ['id' => $model->getKey()];
 
-        $this->resource->readableFields->each(function (ReadableField $field) use ($model, &$data): void {
-            $data[$field->name] = $this->normalize($model->getAttribute($field->name));
-        });
+        $this->resource->readableFields
+            ->reject(fn (ReadableField $field): bool => in_array($field->name, $hidden, true))
+            ->each(function (ReadableField $field) use ($model, &$data): void {
+                $data[$field->name] = $this->normalize($model->getAttribute($field->name));
+            });
 
-        collect(['created_at', 'updated_at'])->each(function (string $column) use ($model, &$data): void {
-            $value = $model->getAttribute($column);
+        collect(['created_at', 'updated_at'])
+            ->reject(fn (string $column): bool => in_array($column, $hidden, true))
+            ->each(function (string $column) use ($model, &$data): void {
+                $value = $model->getAttribute($column);
 
-            if ($value === null) {
-                return;
-            }
+                if ($value === null) {
+                    return;
+                }
 
-            $data[$column] = $this->normalize($value);
-        });
+                $data[$column] = $this->normalize($value);
+            });
 
         return $data;
     }

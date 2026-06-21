@@ -220,9 +220,12 @@ exposed (resources, operations, actions, and fields) in one call.
 
 **Reads vs writes.** Writes (`create`/`update`) are driven by the resource's
 **form**, so the agent can only set fields the form allows. Reads (`list`/`get`)
-are driven by the resource's **infolist** (what Filament shows on the view page),
-falling back to the form when a resource has no infolist. This means view-only
-resources, which have no form but do have an infolist, are still fully readable.
+return the **union** of the resource's **infolist** (what Filament shows on the
+view page) and its writable form fields, so the agent can always read back what
+it can write and still see view-only entries. A resource with only a form, only
+an infolist, or both is fully readable either way. Attributes the model marks
+`$hidden` (passwords, tokens, and the like) are always dropped from read output,
+even if they appear in the form or infolist.
 
 When a resource builds its view schema on the **page** (a `ViewRecord`) rather
 than the resource, introspection finds nothing to read. List the readable
@@ -255,7 +258,8 @@ This is v1 and intentionally scoped:
   selects, toggles/checkboxes and date pickers are mapped. File uploads, custom
   components, and fields the form would not persist (`disabled()`,
   `dehydrated(false)`) are skipped, so the writable surface matches what a real
-  save writes. Reads come from the infolist (see "Reads vs writes" above).
+  save writes. Reads union the infolist and these form fields (see "Reads vs
+  writes" above).
 - **Closure-based form validation is not enforced** at the MCP layer; database
   constraints and model events remain the backstop.
 - **Page-level logic** is honored only through a `prepare` class.

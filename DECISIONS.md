@@ -7,9 +7,10 @@ with the reasoning; open questions are collected at the bottom for us to settle.
 
 What is possible via the Filament panel should be possible via MCP, with
 guardrails that let the developer narrow or override what the MCP can do. The
-panel is the source of truth for both shape (forms drive writes, infolists drive
-reads) and access (policies + query scopes), and config opts resources in and
-scopes their abilities.
+panel is the source of truth for both shape (forms drive writes; reads union the
+infolist and the writable form fields, minus the model's `$hidden`) and access
+(policies + query scopes), and config opts resources in and scopes their
+abilities.
 
 ## Decisions made
 
