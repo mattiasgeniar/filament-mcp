@@ -38,8 +38,11 @@ class ListRecordsTool extends ResourceTool
             'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ]);
 
-        $records = $this->modelClass()::query()
-            ->latest($this->modelClass()::make()->getKeyName())
+        $modelClass = $this->modelClass();
+        $keyName = (new $modelClass)->getKeyName();
+
+        $records = $modelClass::query()
+            ->latest($keyName)
             ->limit($validated['limit'] ?? 25)
             ->get();
 

@@ -1,5 +1,49 @@
 <?php
 
-use VendorName\Skeleton\Tests\TestCase;
+use Laravel\Mcp\Request;
+use Mattiasgeniar\FilamentMcp\Server\ToolFactory;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\User;
+use Mattiasgeniar\FilamentMcp\Tests\TestCase;
+use Mattiasgeniar\FilamentMcp\Tools\ResourceTool;
 
 uses(TestCase::class)->in(__DIR__);
+
+function makeUser(bool $isAdmin = true): User
+{
+    return User::query()->create([
+        'name' => 'Test',
+        'email' => 'user' . uniqid() . '@example.com',
+        'is_admin' => $isAdmin,
+    ]);
+}
+
+function actingAsMcpUser(?User $user = null): User
+{
+    $user ??= makeUser();
+
+    request()->setUserResolver(fn () => $user);
+
+    return $user;
+}
+
+function mcpTool(string $name): ResourceTool
+{
+    foreach (app(ToolFactory::class)->make() as $tool) {
+        if ($tool->name() === $name) {
+            return $tool;
+        }
+    }
+
+    throw new RuntimeException("Tool [{$name}] not found.");
+}
+
+/**
+ * @param  array<string, mixed>  $arguments
+ * @return array<string, mixed>
+ */
+function callMcpTool(string $name, array $arguments): array
+{
+    $response = mcpTool($name)->handle(new Request($arguments));
+
+    return json_decode((string) $response->content(), true);
+}

@@ -17,6 +17,7 @@ use Mattiasgeniar\FilamentMcp\FilamentMcp;
  * @property string $token
  * @property Carbon|null $last_used_at
  * @property Carbon|null $revoked_at
+ * @property-read (Model&Authenticatable)|null $user
  */
 class FilamentMcpToken extends Model
 {

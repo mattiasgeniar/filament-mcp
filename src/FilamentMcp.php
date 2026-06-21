@@ -19,7 +19,7 @@ class FilamentMcp
      */
     public static function authorizeUsing(Closure $callback): void
     {
-        static::$authUsing = $callback;
+        self::$authUsing = $callback;
     }
 
     /**
@@ -29,8 +29,8 @@ class FilamentMcp
      */
     public static function authorize(Authenticatable $user): bool
     {
-        if (static::$authUsing !== null) {
-            return (bool) (static::$authUsing)($user);
+        if (self::$authUsing !== null) {
+            return (bool) (self::$authUsing)($user);
         }
 
         if (Gate::has('viewFilamentMcp')) {
@@ -50,6 +50,6 @@ class FilamentMcp
      */
     public static function flushAuthorization(): void
     {
-        static::$authUsing = null;
+        self::$authUsing = null;
     }
 }
