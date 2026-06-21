@@ -1,10 +1,10 @@
 <?php
 
 use Laravel\Mcp\Request;
+use Laravel\Mcp\Server\Tool;
 use Mattiasgeniar\FilamentMcp\Server\ToolFactory;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\User;
 use Mattiasgeniar\FilamentMcp\Tests\TestCase;
-use Mattiasgeniar\FilamentMcp\Tools\ResourceTool;
 
 uses(TestCase::class)->in(__DIR__);
 
@@ -26,7 +26,7 @@ function actingAsMcpUser(?User $user = null): User
     return $user;
 }
 
-function mcpTool(string $name): ResourceTool
+function mcpTool(string $name): Tool
 {
     foreach (app(ToolFactory::class)->make() as $tool) {
         if ($tool->name() === $name) {

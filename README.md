@@ -184,7 +184,9 @@ pass the token as a bearer header. For Claude Code (`.mcp.json`):
 ```
 
 Each exposed resource produces `list_*`, `get_*`, `create_*`, `update_*`, and
-`delete_*` tools, named from the model (e.g. `create_post`).
+`delete_*` tools, named from the model (e.g. `create_post`), plus any custom
+action tools. A single `describe_resources` tool lets an agent discover what is
+exposed (resources, operations, actions, and fields) in one call.
 
 **Reads vs writes.** Writes (`create`/`update`) are driven by the resource's
 **form**, so the agent can only set fields the form allows. Reads (`list`/`get`)

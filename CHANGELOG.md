@@ -15,3 +15,4 @@ All notable changes to `filament-mcp` will be documented in this file.
 - Read tools driven by the resource infolist (falling back to the form), so view-only resources are readable.
 - `list_*` tools support search, field filters, sorting, and pagination.
 - Custom per-record actions exposed as tools via the `actions` config and the `ResourceAction` base class.
+- A `describe_resources` discovery tool that maps the exposed resources, operations, actions, and fields.

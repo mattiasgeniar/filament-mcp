@@ -3,8 +3,11 @@
 namespace Mattiasgeniar\FilamentMcp\Server;
 
 use InvalidArgumentException;
+use Laravel\Mcp\Server\Tool;
 use Mattiasgeniar\FilamentMcp\Actions\ResourceAction;
 use Mattiasgeniar\FilamentMcp\Contracts\PreparesRecordData;
+use Mattiasgeniar\FilamentMcp\Introspection\FieldDefinition;
+use Mattiasgeniar\FilamentMcp\Introspection\ReadableField;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceIntrospector;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceSchema;
 use Mattiasgeniar\FilamentMcp\Introspection\SchemaCompiler;
@@ -12,6 +15,7 @@ use Mattiasgeniar\FilamentMcp\Support\ResourceAuthorizer;
 use Mattiasgeniar\FilamentMcp\Tools\ActionTool;
 use Mattiasgeniar\FilamentMcp\Tools\CreateRecordTool;
 use Mattiasgeniar\FilamentMcp\Tools\DeleteRecordTool;
+use Mattiasgeniar\FilamentMcp\Tools\DescribeResourcesTool;
 use Mattiasgeniar\FilamentMcp\Tools\GetRecordTool;
 use Mattiasgeniar\FilamentMcp\Tools\ListRecordsTool;
 use Mattiasgeniar\FilamentMcp\Tools\ResourceTool;
@@ -26,37 +30,31 @@ class ToolFactory
     ) {}
 
     /**
-     * @return array<int, ResourceTool>
+     * @return array<int, Tool>
      */
     public function make(): array
     {
         $tools = [];
 
-        /** @var array<int|string, mixed> $resources */
-        $resources = config('filament-mcp.resources', []);
-
-        foreach ($resources as $key => $value) {
-            [$resourceClass, $abilities] = $this->normalize($key, $value);
-
+        foreach ($this->resources() as $resourceClass => $abilities) {
             $schema = $this->introspector->for($resourceClass);
             $prepare = $this->resolvePrepare($abilities['prepare'] ?? null);
+            $operations = $this->operations($abilities);
 
-            $write = $abilities['write'] ?? null;
-
-            if ($abilities['read'] ?? true) {
+            if ($operations['read']) {
                 $tools[] = $this->tool(ListRecordsTool::class, $schema, $prepare);
                 $tools[] = $this->tool(GetRecordTool::class, $schema, $prepare);
             }
 
-            if ($abilities['create'] ?? ($write ?? true)) {
+            if ($operations['create']) {
                 $tools[] = $this->tool(CreateRecordTool::class, $schema, $prepare);
             }
 
-            if ($abilities['update'] ?? ($write ?? true)) {
+            if ($operations['update']) {
                 $tools[] = $this->tool(UpdateRecordTool::class, $schema, $prepare);
             }
 
-            if ($abilities['delete'] ?? ($write ?? true)) {
+            if ($operations['delete']) {
                 $tools[] = $this->tool(DeleteRecordTool::class, $schema, $prepare);
             }
 
@@ -68,7 +66,71 @@ class ToolFactory
             }
         }
 
+        $tools[] = new DescribeResourcesTool;
+
         return $tools;
+    }
+
+    /**
+     * A compact map of the exposed resources, their operations, and their
+     * readable/writable fields, for agent self-discovery.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function describe(): array
+    {
+        $described = [];
+
+        foreach ($this->resources() as $resourceClass => $abilities) {
+            $schema = $this->introspector->for($resourceClass);
+
+            /** @var array<string, mixed> $actions */
+            $actions = $abilities['actions'] ?? [];
+
+            $described[] = [
+                'resource' => $schema->singularName(),
+                'operations' => $this->operations($abilities),
+                'actions' => array_keys($actions),
+                'readable_fields' => $schema->readableFields->map(fn (ReadableField $field): string => $field->name)->values()->all(),
+                'writable_fields' => $schema->fields->map(fn (FieldDefinition $field): string => $field->name)->values()->all(),
+            ];
+        }
+
+        return $described;
+    }
+
+    /**
+     * @return array<class-string, array<string, mixed>>
+     */
+    private function resources(): array
+    {
+        /** @var array<int|string, mixed> $resources */
+        $resources = config('filament-mcp.resources', []);
+
+        $normalized = [];
+
+        foreach ($resources as $key => $value) {
+            [$resourceClass, $abilities] = $this->normalize($key, $value);
+            $normalized[$resourceClass] = $abilities;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * @param  array<string, mixed>  $abilities
+     * @return array{read: bool, create: bool, update: bool, delete: bool}
+     */
+    private function operations(array $abilities): array
+    {
+        $write = $abilities['write'] ?? null;
+
+        return [
+            'read' => (bool) ($abilities['read'] ?? true),
+            'create' => (bool) ($abilities['create'] ?? ($write ?? true)),
+            'update' => (bool) ($abilities['update'] ?? ($write ?? true)),
+            'delete' => (bool) ($abilities['delete'] ?? ($write ?? true)),
+        ];
     }
 
     private function resolveAction(mixed $action): ResourceAction
