@@ -1,0 +1,75 @@
+{
+    "name": "mattiasgeniar/filament-mcp",
+    "description": "Expose your Filament resources to AI agents over the Model Context Protocol, with per-record CRUD, token auth, and policy-aware access.",
+    "keywords": [
+        "mattiasgeniar",
+        "laravel",
+        "filamentphp",
+        "filament",
+        "filament-plugin",
+        "mcp",
+        "model-context-protocol",
+        "ai"
+    ],
+    "homepage": "https://github.com/mattiasgeniar/filament-mcp",
+    "support": {
+        "issues": "https://github.com/mattiasgeniar/filament-mcp/issues",
+        "source": "https://github.com/mattiasgeniar/filament-mcp"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mattias Geniar",
+            "email": "m@ttias.be",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "filament/filament": "^5.0",
+        "laravel/mcp": "^0.7",
+        "spatie/laravel-package-tools": "^1.15"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.0",
+        "nunomaduro/collision": "^8.0",
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^3.7|^4.0",
+        "pestphp/pest-plugin-laravel": "^3.0|^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mattiasgeniar\\FilamentMcp\\": "src/",
+            "Mattiasgeniar\\FilamentMcp\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mattiasgeniar\\FilamentMcp\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "analyse": "phpstan analyse",
+        "lint": "pint",
+        "test": "pest",
+        "test:lint": "pint --test"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mattiasgeniar\\FilamentMcp\\FilamentMcpServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
