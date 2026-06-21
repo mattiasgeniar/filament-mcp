@@ -49,9 +49,9 @@ class UpdateRecordTool extends ResourceTool
         $record->forceFill($this->prepare($validated, $record));
         $record->save();
 
-        return Response::text((string) json_encode([
+        return $this->json([
             'success' => true,
             'record' => $this->present($record),
-        ], JSON_PRETTY_PRINT));
+        ]);
     }
 }

@@ -14,6 +14,10 @@ use Mattiasgeniar\FilamentMcp\Introspection\ReadableField;
 #[IsReadOnly]
 class ListRecordsTool extends ResourceTool
 {
+    protected int $defaultPerPage = 25;
+
+    protected int $maxPerPage = 100;
+
     public function name(): string
     {
         return 'list_' . $this->resource->pluralName();
@@ -32,7 +36,7 @@ class ListRecordsTool extends ResourceTool
             'sort' => $schema->string()->enum($this->sortableColumns())->description('Field to sort by.'),
             'direction' => $schema->string()->enum(['asc', 'desc'])->description('Sort direction (default desc).'),
             'page' => $schema->integer()->description('Page number (default 1).'),
-            'per_page' => $schema->integer()->description('Records per page (default 25, max 100).'),
+            'per_page' => $schema->integer()->description("Records per page (default {$this->defaultPerPage}, max {$this->maxPerPage})."),
         ];
     }
 
@@ -48,7 +52,7 @@ class ListRecordsTool extends ResourceTool
             'sort' => ['sometimes', 'string', Rule::in($this->sortableColumns())],
             'direction' => ['sometimes', Rule::in(['asc', 'desc'])],
             'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'per_page' => ['sometimes', 'integer', 'min:1', "max:{$this->maxPerPage}"],
         ]);
 
         $query = $this->query();
@@ -57,22 +61,22 @@ class ListRecordsTool extends ResourceTool
         $this->applyFilters($query, $validated['filters'] ?? []);
 
         $query->orderBy(
-            $validated['sort'] ?? (new ($this->modelClass()))->getKeyName(),
+            $validated['sort'] ?? $this->keyName(),
             $validated['direction'] ?? 'desc',
         );
 
-        $perPage = $validated['per_page'] ?? 25;
+        $perPage = $validated['per_page'] ?? $this->defaultPerPage;
         $page = $validated['page'] ?? 1;
         $total = (clone $query)->count();
 
         $records = $query->forPage($page, $perPage)->get();
 
-        return Response::text((string) json_encode([
+        return $this->json([
             'total' => $total,
             'page' => $page,
             'per_page' => $perPage,
             'records' => $records->map(fn (Model $model): array => $this->present($model))->all(),
-        ], JSON_PRETTY_PRINT));
+        ]);
     }
 
     /**
@@ -127,7 +131,7 @@ class ListRecordsTool extends ResourceTool
     {
         return array_values(array_unique([
             ...$this->fieldNames(),
-            (new ($this->modelClass()))->getKeyName(),
+            $this->keyName(),
         ]));
     }
 }

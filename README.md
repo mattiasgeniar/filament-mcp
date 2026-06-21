@@ -146,6 +146,27 @@ class PublishPost extends ResourceAction
 }
 ```
 
+The action is authorized before it runs: the acting user must pass the resource
+policy ability returned by `ability()` (defaults to `update`) against the target
+record, exactly like the built-in write tools. Override `ability()` to map onto a
+dedicated policy method.
+
+Arguments are an allowlist: only keys you declare in `rules()` are validated and
+forwarded to `handle()`, so an agent cannot smuggle undeclared attributes into the
+action. Mirror whatever `schema()` advertises:
+
+```php
+public function schema(JsonSchema $schema): array
+{
+    return ['reason' => $schema->string()->description('Why it was published.')];
+}
+
+public function rules(): array
+{
+    return ['reason' => ['required', 'string', 'max:255']];
+}
+```
+
 ### Other options
 
 | Key            | Default         | Purpose                                            |

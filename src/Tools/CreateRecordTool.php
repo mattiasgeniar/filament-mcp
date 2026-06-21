@@ -39,9 +39,9 @@ class CreateRecordTool extends ResourceTool
         $record->forceFill($this->prepare($validated, null));
         $record->save();
 
-        return Response::text((string) json_encode([
+        return $this->json([
             'success' => true,
             'record' => $this->present($record),
-        ], JSON_PRETTY_PRINT));
+        ]);
     }
 }

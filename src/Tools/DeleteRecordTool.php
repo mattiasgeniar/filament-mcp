@@ -45,9 +45,9 @@ class DeleteRecordTool extends ResourceTool
 
         $record->delete();
 
-        return Response::text((string) json_encode([
+        return $this->json([
             'success' => true,
             'deleted_id' => $validated['id'],
-        ], JSON_PRETTY_PRINT));
+        ]);
     }
 }

@@ -97,6 +97,19 @@ abstract class ResourceTool extends BaseTool
         return $this->query()->find($id);
     }
 
+    protected function keyName(): string
+    {
+        return (new ($this->modelClass()))->getKeyName();
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function json(array $payload): Response
+    {
+        return Response::text((string) json_encode($payload, JSON_PRETTY_PRINT));
+    }
+
     /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -134,7 +147,7 @@ abstract class ResourceTool extends BaseTool
         return $data;
     }
 
-    private function normalize(mixed $value): mixed
+    protected function normalize(mixed $value): mixed
     {
         if ($value instanceof BackedEnum) {
             return $value->value;

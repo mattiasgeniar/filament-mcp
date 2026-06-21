@@ -21,7 +21,7 @@ class InfolistIntrospector
      *
      * @var array<int, class-string>
      */
-    private array $skip = [
+    protected array $skippedEntries = [
         ImageEntry::class,
         RepeatableEntry::class,
         ViewEntry::class,
@@ -72,7 +72,7 @@ class InfolistIntrospector
 
     private function map(Entry $entry): ?ReadableField
     {
-        foreach ($this->skip as $skipped) {
+        foreach ($this->skippedEntries as $skipped) {
             if ($entry instanceof $skipped) {
                 return null;
             }

@@ -16,11 +16,33 @@ abstract class ResourceAction
     abstract public function description(): string;
 
     /**
+     * The policy ability the acting user must satisfy on the record before the
+     * action runs. Filament treats custom record actions as mutations, so this
+     * defaults to `update`; override it to map onto a dedicated policy method.
+     */
+    public function ability(): string
+    {
+        return 'update';
+    }
+
+    /**
      * Extra arguments the action accepts, beyond the record `id`.
      *
      * @return array<string, mixed>
      */
     public function schema(JsonSchema $schema): array
+    {
+        return [];
+    }
+
+    /**
+     * Validation rules for the action's arguments. Only keys with a rule here
+     * reach handle(), so the agent cannot smuggle undeclared attributes into the
+     * action. Mirror whatever schema() advertises.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules(): array
     {
         return [];
     }

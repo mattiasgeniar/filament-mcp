@@ -43,6 +43,6 @@ class GetRecordTool extends ResourceTool
             return Response::error("Not authorized to view this {$this->resource->singularName()}.");
         }
 
-        return Response::text((string) json_encode($this->present($record), JSON_PRETTY_PRINT));
+        return $this->json($this->present($record));
     }
 }

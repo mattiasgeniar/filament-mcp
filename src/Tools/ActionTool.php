@@ -41,7 +41,7 @@ class ActionTool extends ResourceTool
 
     protected function run(Request $request): Response
     {
-        $validated = $request->validate(['id' => ['required']]);
+        $validated = $request->validate(['id' => ['required']] + $this->action->rules());
 
         $record = $this->findRecord($validated['id']);
 
@@ -49,14 +49,17 @@ class ActionTool extends ResourceTool
             return Response::error("No {$this->resource->singularName()} found with id {$validated['id']}.");
         }
 
-        $arguments = $request->all();
-        unset($arguments['id']);
+        if (! $this->authorizer->allows($this->user(), $this->modelClass(), $this->action->ability(), $record)) {
+            return Response::error("Not authorized to {$this->key} this {$this->resource->singularName()}.");
+        }
 
-        $result = $this->action->handle($record, $arguments);
+        unset($validated['id']);
 
-        return Response::text((string) json_encode([
+        $result = $this->action->handle($record, $validated);
+
+        return $this->json([
             'success' => true,
             'result' => $result,
-        ], JSON_PRETTY_PRINT));
+        ]);
     }
 }
