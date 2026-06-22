@@ -26,7 +26,7 @@ file.
   field shows up as a tool argument automatically.
 - **Safe by default.** Access is forbidden until you explicitly grant it in the config.
 - **Text fields only.** Only text-like fields are exposed (see [Limitations](#limitations)).
-- **Audited.** Every tool call is recorded.
+- **Audited.** Every tool call is recorded and attributed to the token that made it. Review a token's call history on its own activity page in the panel.
 
 ## Requirements
 

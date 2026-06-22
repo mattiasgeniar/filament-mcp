@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int|null $user_id
+ * @property int|null $filament_mcp_token_id
  * @property string $tool_name
  * @property array<string, mixed>|null $arguments
  * @property bool $success
@@ -21,6 +22,7 @@ class FilamentMcpToolCall extends Model
 
     protected $fillable = [
         'user_id',
+        'filament_mcp_token_id',
         'tool_name',
         'arguments',
         'success',
@@ -33,6 +35,7 @@ class FilamentMcpToolCall extends Model
         return [
             'arguments' => 'array',
             'success' => 'boolean',
+            'duration_ms' => 'integer',
             'created_at' => 'datetime',
         ];
     }

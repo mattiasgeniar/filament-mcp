@@ -5,6 +5,7 @@ namespace Mattiasgeniar\FilamentMcp\Filament;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Mattiasgeniar\FilamentMcp\Filament\Pages\ManageMcpTokens;
+use Mattiasgeniar\FilamentMcp\Filament\Pages\TokenActivity;
 
 class FilamentMcpPlugin implements Plugin
 {
@@ -22,6 +23,7 @@ class FilamentMcpPlugin implements Plugin
     {
         $panel->pages([
             ManageMcpTokens::class,
+            TokenActivity::class,
         ]);
     }
 

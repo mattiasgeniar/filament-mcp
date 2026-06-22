@@ -13,6 +13,7 @@ use Laravel\Mcp\Server\Tool as BaseTool;
 use Mattiasgeniar\FilamentMcp\Introspection\ReadableField;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceSchema;
 use Mattiasgeniar\FilamentMcp\Introspection\SchemaCompiler;
+use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
 use Mattiasgeniar\FilamentMcp\Support\ModelAttributeVisibility;
 use Mattiasgeniar\FilamentMcp\Support\ResourceAuthorizer;
@@ -52,6 +53,7 @@ abstract class ResourceTool extends BaseTool
         try {
             FilamentMcpToolCall::query()->create([
                 'user_id' => request()->user()?->getAuthIdentifier(),
+                'filament_mcp_token_id' => request()->attributes->get(FilamentMcpToken::REQUEST_ATTRIBUTE)?->getKey(),
                 'tool_name' => $this->name(),
                 'arguments' => $request->all(),
                 'success' => $success,

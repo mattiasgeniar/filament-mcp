@@ -188,3 +188,19 @@ it('records every tool call in the audit log', function () {
     expect($call->success)->toBeTrue();
     expect($call->user_id)->not->toBeNull();
 });
+
+it('records the token that authenticated each tool call', function () {
+    ['token' => $token] = actingAsMcpToken();
+
+    callMcpTool('create_article', ['title' => 'Audited', 'body' => 'Body.']);
+
+    expect(FilamentMcpToolCall::query()->latest('id')->first()->filament_mcp_token_id)
+        ->toBe($token->getKey());
+});
+
+it('leaves the token null when no token authenticated the call', function () {
+    callMcpTool('create_article', ['title' => 'Audited', 'body' => 'Body.']);
+
+    expect(FilamentMcpToolCall::query()->latest('id')->first()->filament_mcp_token_id)
+        ->toBeNull();
+});

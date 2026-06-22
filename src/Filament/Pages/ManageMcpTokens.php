@@ -17,6 +17,7 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Mattiasgeniar\FilamentMcp\Filament\Concerns\ResolvesPanelUser;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
 use UnitEnum;
@@ -24,6 +25,7 @@ use UnitEnum;
 class ManageMcpTokens extends Page implements HasTable
 {
     use InteractsWithTable;
+    use ResolvesPanelUser;
 
     protected string $view = 'filament-mcp::filament.pages.manage-mcp-tokens';
 
@@ -112,6 +114,11 @@ class ManageMcpTokens extends Page implements HasTable
                     ->since(),
             ])
             ->recordActions([
+                Action::make('activity')
+                    ->label('Activity')
+                    ->icon('heroicon-m-list-bullet')
+                    ->color('gray')
+                    ->url(fn (FilamentMcpToken $record): string => TokenActivity::getUrl(['tokenId' => $record->getKey()])),
                 Action::make('revoke')
                     ->icon('heroicon-m-x-mark')
                     ->color('danger')
@@ -195,14 +202,5 @@ class ManageMcpTokens extends Page implements HasTable
         }
 
         return $query->whereNull('revoked_at');
-    }
-
-    protected function currentUser(): Authenticatable
-    {
-        $user = Filament::auth()->user();
-
-        abort_unless($user instanceof Authenticatable, 403);
-
-        return $user;
     }
 }
