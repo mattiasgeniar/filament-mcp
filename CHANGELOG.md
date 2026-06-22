@@ -4,6 +4,13 @@ All notable changes to `filament-mcp` will be documented in this file.
 
 ## Unreleased
 
+## 0.0.4 - 2026-06-22
+
+### Added
+
+- A **Connect a client** setup guide on the token page with ready-to-paste config for Claude Code, Cursor, VS Code, and Codex. The endpoint URL is prefilled and the server key follows `config('filament-mcp.server.name')`; tabs are collapsed until clicked. Hide it with `ui.show_setup_guide => false`.
+- The token table is split into Active and Revoked tabs with counts, keeping long token lists readable.
+
 ## 0.0.3 - 2026-06-22
 
 ### Fixed
