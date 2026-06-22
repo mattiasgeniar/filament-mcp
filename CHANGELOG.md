@@ -4,6 +4,16 @@ All notable changes to `filament-mcp` will be documented in this file.
 
 ## Unreleased
 
+## 0.0.3 - 2026-06-22
+
+### Fixed
+
+- MCP requests now initialize Filament panel and tenant context before tools run, so resource queries keep the same panel/tenant guardrails as the dashboard.
+- MCP tokens are bound to the issuing authenticatable model instead of only a numeric user id, fixing multi-guard/custom-user collisions.
+- Built-in MCP tools are generated only for operations exposed by the Filament resource pages, and delete tools are now an explicit per-resource opt-in.
+- Eloquent `$hidden` / `$visible` settings are enforced before MCP schemas are built, excluding hidden attributes from discovery, writes, reads, search, filters, and sorting.
+- Existing installs with a legacy non-null `user_id` token column can upgrade to morph-token storage and still issue new tokens.
+
 ## 0.0.2 - 2026-06-21
 
 ### Added
