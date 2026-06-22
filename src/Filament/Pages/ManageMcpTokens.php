@@ -27,6 +27,13 @@ class ManageMcpTokens extends Page implements HasTable
 
     protected string $view = 'filament-mcp::filament.pages.manage-mcp-tokens';
 
+    public string $activeTokenTab = 'active';
+
+    public function updatedActiveTokenTab(): void
+    {
+        $this->resetPage();
+    }
+
     public static function canAccess(): bool
     {
         if (! config('filament-mcp.ui.enabled', true)) {
@@ -103,10 +110,6 @@ class ManageMcpTokens extends Page implements HasTable
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->since(),
-                TextColumn::make('status')
-                    ->badge()
-                    ->state(fn (FilamentMcpToken $record): string => $record->revoked_at ? 'Revoked' : 'Active')
-                    ->color(fn (string $state): string => $state === 'Active' ? 'success' : 'gray'),
             ])
             ->recordActions([
                 Action::make('revoke')
@@ -169,13 +172,29 @@ class ManageMcpTokens extends Page implements HasTable
             ->modalCancelActionLabel('Done');
     }
 
+    public function activeTokenCount(): int
+    {
+        return $this->ownTokensQuery('active')->count();
+    }
+
+    public function revokedTokenCount(): int
+    {
+        return $this->ownTokensQuery('revoked')->count();
+    }
+
     /**
      * @return Builder<FilamentMcpToken>
      */
-    protected function ownTokensQuery(): Builder
+    protected function ownTokensQuery(?string $tab = null): Builder
     {
-        return FilamentMcpToken::query()
+        $query = FilamentMcpToken::query()
             ->forUser($this->currentUser());
+
+        if (($tab ?? $this->activeTokenTab) === 'revoked') {
+            return $query->whereNotNull('revoked_at');
+        }
+
+        return $query->whereNull('revoked_at');
     }
 
     protected function currentUser(): Authenticatable

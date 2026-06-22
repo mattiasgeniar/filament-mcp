@@ -69,6 +69,25 @@ it('revokes a token by stamping revoked_at', function () {
     expect($token->fresh()->revoked_at)->not->toBeNull();
 });
 
+it('splits the token table into active and revoked tabs', function () {
+    $user = makeUser();
+    ['token' => $active] = FilamentMcpToken::issue($user, 'Active one');
+    ['token' => $revoked] = FilamentMcpToken::issue($user, 'Revoked one');
+    $revoked->revoke();
+
+    $this->actingAs($user);
+
+    $page = tokenPage();
+
+    expect($page->exposeQuery()->pluck('id')->all())->toBe([$active->id])
+        ->and($page->activeTokenCount())->toBe(1)
+        ->and($page->revokedTokenCount())->toBe(1);
+
+    $page->activeTokenTab = 'revoked';
+
+    expect($page->exposeQuery()->pluck('id')->all())->toBe([$revoked->id]);
+});
+
 it('builds the setup-guide endpoint url from the configured path', function () {
     config(['filament-mcp.path' => 'custom/mcp']);
 
