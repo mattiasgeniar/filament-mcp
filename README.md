@@ -271,6 +271,19 @@ pass the token as a bearer header. For Claude Code (`.mcp.json`):
 }
 ```
 
+Or add it with the Claude Code CLI:
+
+```bash
+claude mcp add --transport http my-app https://your-app.test/filament-mcp \
+  --header "Authorization: Bearer fmcp_..."
+```
+
+Remove it again with:
+
+```bash
+claude mcp remove my-app
+```
+
 The token page renders this same ready-to-paste config for Claude Code, Cursor,
 VS Code, and Codex under a **Connect a client** section, with the endpoint URL
 already filled in. Hide it with `ui.show_setup_guide => false`.
