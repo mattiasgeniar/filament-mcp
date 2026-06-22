@@ -16,6 +16,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
 use UnitEnum;
@@ -70,6 +71,21 @@ class ManageMcpTokens extends Page implements HasTable
     public function getTitle(): string | Htmlable
     {
         return 'MCP access tokens';
+    }
+
+    public function showSetupGuide(): bool
+    {
+        return (bool) config('filament-mcp.ui.show_setup_guide', true);
+    }
+
+    public function mcpEndpointUrl(): string
+    {
+        return url(ltrim((string) config('filament-mcp.path', 'filament-mcp'), '/'));
+    }
+
+    public function mcpServerKey(): string
+    {
+        return Str::slug((string) config('filament-mcp.server.name', 'filament-mcp')) ?: 'filament-mcp';
     }
 
     public function table(Table $table): Table

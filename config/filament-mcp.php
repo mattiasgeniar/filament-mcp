@@ -127,10 +127,16 @@ return [
     | the same rule that guards the MCP server itself. Set `enabled` to false to
     | hide the page even where the plugin is registered.
     |
+    | `show_setup_guide` renders a tabbed "Connect a client" section below the
+    | token table with ready-to-paste config for Claude Code, Cursor, and VS Code.
+    | Set it to false to hide that guide.
+    |
     */
 
     'ui' => [
         'enabled' => true,
+
+        'show_setup_guide' => true,
 
         'navigation' => [
             'group' => 'MCP',

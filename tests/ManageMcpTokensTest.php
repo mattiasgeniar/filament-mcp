@@ -68,3 +68,23 @@ it('revokes a token by stamping revoked_at', function () {
 
     expect($token->fresh()->revoked_at)->not->toBeNull();
 });
+
+it('builds the setup-guide endpoint url from the configured path', function () {
+    config(['filament-mcp.path' => 'custom/mcp']);
+
+    expect(tokenPage()->mcpEndpointUrl())->toBe(url('custom/mcp'));
+});
+
+it('derives a slugged server key from the server name', function () {
+    config(['filament-mcp.server.name' => 'My Cool App']);
+
+    expect(tokenPage()->mcpServerKey())->toBe('my-cool-app');
+});
+
+it('shows the setup guide by default and hides it when disabled', function () {
+    expect(tokenPage()->showSetupGuide())->toBeTrue();
+
+    config(['filament-mcp.ui.show_setup_guide' => false]);
+
+    expect(tokenPage()->showSetupGuide())->toBeFalse();
+});
