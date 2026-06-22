@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('filament_mcp_tokens', function (Blueprint $table) {
             $table->id();
-            $table->morphs('tokenable');
+            $table->nullableMorphs('tokenable');
             $table->string('name');
             $table->string('token', 64)->unique();
             $table->timestamp('last_used_at')->nullable();
