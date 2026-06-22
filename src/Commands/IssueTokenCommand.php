@@ -20,7 +20,13 @@ class IssueTokenCommand extends Command
 
     public function handle(): int
     {
-        $identifier = $this->argument('user');
+        $identifier = $this->stringArgument('user');
+
+        if ($identifier === null) {
+            $this->error('The user argument must be a string.');
+
+            return self::FAILURE;
+        }
 
         $user = $this->resolveUser($identifier);
 
@@ -45,6 +51,21 @@ class IssueTokenCommand extends Command
         $this->line($plainText);
 
         return self::SUCCESS;
+    }
+
+    private function stringArgument(string $key): ?string
+    {
+        $value = $this->argument($key);
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+
+        return null;
     }
 
     private function resolveUser(string $identifier): ?Authenticatable
