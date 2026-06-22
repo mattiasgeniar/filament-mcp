@@ -38,6 +38,8 @@
 
             $claudeCli = "claude mcp add --transport http {$key} {$endpoint} \\\n  --header \"Authorization: Bearer fmcp_...\"";
 
+            $claudeCliRemove = "claude mcp remove {$key}";
+
             $cursorJson = <<<JSON
             {
               "mcpServers": {
@@ -116,6 +118,12 @@
 
                     @include('filament-mcp::filament.partials.code-block', ['code' => $claudeJson, 'label' => '.mcp.json'])
                     @include('filament-mcp::filament.partials.code-block', ['code' => $claudeCli, 'label' => 'Terminal'])
+
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
+                        To remove it again, run:
+                    </p>
+
+                    @include('filament-mcp::filament.partials.code-block', ['code' => $claudeCliRemove, 'label' => 'Terminal'])
                 </div>
 
                 <div x-show="tab === 'cursor'" x-cloak style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -124,6 +132,10 @@
                     </p>
 
                     @include('filament-mcp::filament.partials.code-block', ['code' => $cursorJson, 'label' => '.cursor/mcp.json'])
+
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
+                        To remove it again, delete the <code>{{ $key }}</code> entry from that file.
+                    </p>
                 </div>
 
                 <div x-show="tab === 'vscode'" x-cloak style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -132,6 +144,10 @@
                     </p>
 
                     @include('filament-mcp::filament.partials.code-block', ['code' => $vscodeJson, 'label' => '.vscode/mcp.json'])
+
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
+                        To remove it again, delete the <code>{{ $key }}</code> entry from that file.
+                    </p>
                 </div>
 
                 <div x-show="tab === 'codex'" x-cloak style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -140,6 +156,10 @@
                     </p>
 
                     @include('filament-mcp::filament.partials.code-block', ['code' => $codexToml, 'label' => '~/.codex/config.toml'])
+
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
+                        To remove it again, delete the <code>[mcp_servers.{{ $key }}]</code> block from that file.
+                    </p>
                 </div>
 
                 <p style="font-size: 0.75rem; color: rgb(156 163 175);">
