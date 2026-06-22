@@ -4,6 +4,12 @@ All notable changes to `filament-mcp` will be documented in this file.
 
 ## Unreleased
 
+## 0.0.5 - 2026-06-22
+
+### Fixed
+
+- A resource with only a Filament `view` page (no index/manage) now generates a `get_*` tool, so single records are fetchable by id without exposing a full listing. `list_*` still requires an index or manage page. `describe_resources` now reports a distinct `list` operation alongside `read`.
+
 ## 0.0.4 - 2026-06-22
 
 ### Added
