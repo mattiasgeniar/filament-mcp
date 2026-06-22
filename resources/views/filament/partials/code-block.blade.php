@@ -2,7 +2,7 @@
 
 <div x-data="{ copied: false }" class="fi-mcp-code-block">
     @if ($label)
-        <p class="text-xs font-medium text-gray-500 dark:text-gray-400" style="margin-bottom: 0.375rem;">
+        <p style="margin-bottom: 0.375rem; font-size: 0.75rem; font-weight: 500; color: rgb(107 114 128);">
             {{ $label }}
         </p>
     @endif

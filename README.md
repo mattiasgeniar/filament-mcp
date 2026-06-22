@@ -271,6 +271,10 @@ pass the token as a bearer header. For Claude Code (`.mcp.json`):
 }
 ```
 
+The token page renders this same ready-to-paste config for Claude Code, Cursor,
+VS Code, and Codex under a **Connect a client** section, with the endpoint URL
+already filled in. Hide it with `ui.show_setup_guide => false`.
+
 If the configured/current Filament panel uses Filament tenancy, include the
 tenant route key in the `X-Filament-Mcp-Tenant` header (or the configured
 `tenant_header`). The token user must implement Filament's tenant contract and

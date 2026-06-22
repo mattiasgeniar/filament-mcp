@@ -1,4 +1,22 @@
 <x-filament-panels::page>
+    <x-filament::tabs>
+        <x-filament::tabs.item
+            :active="$activeTokenTab === 'active'"
+            :badge="$this->activeTokenCount()"
+            wire:click="$set('activeTokenTab', 'active')"
+        >
+            Active
+        </x-filament::tabs.item>
+
+        <x-filament::tabs.item
+            :active="$activeTokenTab === 'revoked'"
+            :badge="$this->revokedTokenCount()"
+            wire:click="$set('activeTokenTab', 'revoked')"
+        >
+            Revoked
+        </x-filament::tabs.item>
+    </x-filament::tabs>
+
     {{ $this->table }}
 
     @if ($this->showSetupGuide())
@@ -42,6 +60,12 @@
               }
             }
             JSON;
+
+            $codexToml = <<<TOML
+            [mcp_servers.{$key}]
+            url = "{$endpoint}"
+            http_headers = { "Authorization" = "Bearer fmcp_..." }
+            TOML;
         @endphp
 
         <x-filament::section
@@ -51,12 +75,10 @@
             <x-slot name="heading">Connect a client</x-slot>
 
             <x-slot name="description">
-                Generate a token above, then drop it into your AI agent's MCP config.
-                The endpoint below is already filled in for this app; replace
-                <code>fmcp_...</code> with the token you copied.
+                Click the tabs below to find instructions for your favorite AI agent.
             </x-slot>
 
-            <div x-data="{ tab: 'claude' }" class="flex flex-col gap-4">
+            <div x-data="{ tab: null }" style="display: flex; flex-direction: column; gap: 1rem;">
                 <x-filament::tabs>
                     <x-filament::tabs.item
                         :alpine-active="'tab === \'claude\''"
@@ -78,10 +100,17 @@
                     >
                         VS Code
                     </x-filament::tabs.item>
+
+                    <x-filament::tabs.item
+                        :alpine-active="'tab === \'codex\''"
+                        x-on:click="tab = 'codex'"
+                    >
+                        Codex
+                    </x-filament::tabs.item>
                 </x-filament::tabs>
 
-                <div x-show="tab === 'claude'" class="flex flex-col gap-3">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                <div x-show="tab === 'claude'" x-cloak style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
                         Add this to your project's <code>.mcp.json</code>, or run the CLI command.
                     </p>
 
@@ -89,23 +118,31 @@
                     @include('filament-mcp::filament.partials.code-block', ['code' => $claudeCli, 'label' => 'Terminal'])
                 </div>
 
-                <div x-show="tab === 'cursor'" x-cloak class="flex flex-col gap-3">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                <div x-show="tab === 'cursor'" x-cloak style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
                         Add this to <code>.cursor/mcp.json</code> (project) or <code>~/.cursor/mcp.json</code> (global).
                     </p>
 
                     @include('filament-mcp::filament.partials.code-block', ['code' => $cursorJson, 'label' => '.cursor/mcp.json'])
                 </div>
 
-                <div x-show="tab === 'vscode'" x-cloak class="flex flex-col gap-3">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                <div x-show="tab === 'vscode'" x-cloak style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
                         Add this to <code>.vscode/mcp.json</code> in your workspace, then start the server from the editor.
                     </p>
 
                     @include('filament-mcp::filament.partials.code-block', ['code' => $vscodeJson, 'label' => '.vscode/mcp.json'])
                 </div>
 
-                <p class="text-xs text-gray-400 dark:text-gray-500">
+                <div x-show="tab === 'codex'" x-cloak style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <p style="font-size: 0.875rem; color: rgb(107 114 128);">
+                        Add this to <code>~/.codex/config.toml</code>.
+                    </p>
+
+                    @include('filament-mcp::filament.partials.code-block', ['code' => $codexToml, 'label' => '~/.codex/config.toml'])
+                </div>
+
+                <p style="font-size: 0.75rem; color: rgb(156 163 175);">
                     Using Filament tenancy? Also send the tenant route key in the
                     <code>{{ config('filament-mcp.tenant_header', 'X-Filament-Mcp-Tenant') }}</code> header.
                 </p>
