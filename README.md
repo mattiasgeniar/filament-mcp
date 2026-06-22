@@ -183,6 +183,8 @@ public function rules(): array
 | `enabled`      | `true`          | Master switch; when false no route is registered.  |
 | `path`         | `filament-mcp`  | The URL the server is mounted on.                  |
 | `middleware`   | `throttle:60,1` | Extra middleware appended after token auth.        |
+| `panel`        | `null`          | Filament panel id to run tools under.              |
+| `tenant_header` | `X-Filament-Mcp-Tenant` | Header used to select the tenant on tenant panels. |
 | `token_prefix` | `fmcp_`         | Prefix for generated tokens.                       |
 
 ## Issuing a token
@@ -267,6 +269,11 @@ pass the token as a bearer header. For Claude Code (`.mcp.json`):
   }
 }
 ```
+
+If the configured/current Filament panel uses Filament tenancy, include the
+tenant route key in the `X-Filament-Mcp-Tenant` header (or the configured
+`tenant_header`). The token user must implement Filament's tenant contract and
+pass `canAccessTenant()` for that tenant before any tools run.
 
 Each exposed resource produces `list_*`, `get_*`, `create_*`, `update_*`, and
 `delete_*` tools, named from the model (e.g. `create_post`), plus any custom
