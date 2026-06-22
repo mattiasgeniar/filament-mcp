@@ -2,6 +2,8 @@
 
 use Illuminate\Validation\ValidationException;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Article;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Profile;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ProfileResource;
 
 beforeEach(function () {
     actingAsMcpUser();
@@ -49,5 +51,20 @@ it('paginates the result set', function () {
 
 it('rejects sorting by a column that is not a readable field', function () {
     expect(fn () => callMcpTool('list_articles', ['sort' => 'password']))
+        ->toThrow(ValidationException::class);
+});
+
+it('does not search, filter, or sort by model hidden attributes', function () {
+    config(['filament-mcp.resources' => [ProfileResource::class]]);
+
+    Profile::query()->create(['name' => 'Ada', 'bio' => 'Engineer', 'secret_token' => 'sk_hidden_ada']);
+    Profile::query()->create(['name' => 'Grace', 'bio' => 'Scientist', 'secret_token' => 'sk_hidden_grace']);
+
+    $searched = callMcpTool('list_profiles', ['search' => 'sk_hidden_ada']);
+    $filtered = callMcpTool('list_profiles', ['filters' => ['secret_token' => 'sk_hidden_ada']]);
+
+    expect($searched['total'])->toBe(0);
+    expect($filtered['total'])->toBe(2);
+    expect(fn () => callMcpTool('list_profiles', ['sort' => 'secret_token']))
         ->toThrow(ValidationException::class);
 });

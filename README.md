@@ -292,9 +292,10 @@ A single `describe_resources` tool lets an agent discover what is exposed
 return the **union** of the resource's **infolist** (what Filament shows on the
 view page) and its writable form fields, so the agent can always read back what
 it can write and still see view-only entries. A resource with only a form, only
-an infolist, or both is fully readable either way. Attributes the model marks
-`$hidden` (passwords, tokens, and the like) are always dropped from read output,
-even if they appear in the form or infolist.
+an infolist, or both is fully readable either way. The model's `$hidden` and
+`$visible` settings are enforced before tool schemas are built, so hidden
+attributes are excluded from discovery, writes, reads, search, filters, and sort
+options even if they appear in the form, infolist, or `read_fields`.
 
 When a resource builds its view schema on the **page** (a `ViewRecord`) rather
 than the resource, introspection finds nothing to read. List the readable
@@ -313,11 +314,13 @@ attributes explicitly with `read_fields`:
 2. **Authorization** — the resolved user must pass your gate/callback; access is denied until you grant it.
 3. **Filament resource surface** — tools are generated only for operations that
    have matching resource pages, and delete is an explicit opt-in.
-4. **Policies** — each tool call also respects the model's Filament policy when one
+4. **Model attribute visibility** — fields hidden by the Eloquent model are not
+   exposed in schemas, list controls, or responses.
+5. **Policies** — each tool call also respects the model's Filament policy when one
    exists.
-5. **Query scoping** — records are read and written through the resource's
+6. **Query scoping** — records are read and written through the resource's
    `getEloquentQuery()`, so your tenant scopes and soft-delete filters apply.
-6. **Audit** — every call is logged to `filament_mcp_tool_calls`.
+7. **Audit** — every call is logged to `filament_mcp_tool_calls`.
 
 Revoke a token by setting `revoked_at` on its `filament_mcp_tokens` row.
 
