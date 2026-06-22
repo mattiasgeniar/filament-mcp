@@ -7,6 +7,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Report;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ReportResource\Pages;
 
 class ReportResource extends Resource
 {
@@ -28,6 +29,8 @@ class ReportResource extends Resource
 
     public static function getPages(): array
     {
-        return [];
+        return [
+            'index' => Pages\ListReports::route('/'),
+        ];
     }
 }

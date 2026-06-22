@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
+use Mattiasgeniar\FilamentMcp\Support\FilamentContext;
 use Symfony\Component\HttpFoundation\Response;
 
 class Authenticate
@@ -37,6 +38,12 @@ class Authenticate
 
         $request->setUserResolver(fn () => $user);
         Auth::setUser($user);
+
+        $contextError = app(FilamentContext::class)->initialize($request, $user);
+
+        if ($contextError !== null) {
+            return $this->forbidden($contextError);
+        }
 
         $token->markAsUsed();
 

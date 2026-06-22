@@ -36,6 +36,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Filament panel context
+    |--------------------------------------------------------------------------
+    |
+    | MCP requests run outside Filament's normal panel routes, so the package
+    | establishes the panel context before any resource queries run. Leave this
+    | null to use the current/default panel, or set an explicit panel id when
+    | your app has multiple panels.
+    |
+    | If that panel has Filament tenancy enabled, clients must send the tenant
+    | route key in this header. The user resolved from the token must be allowed
+    | to access that tenant before any tools run.
+    |
+    */
+
+    'panel' => env('FILAMENT_MCP_PANEL'),
+
+    'tenant_header' => 'X-Filament-Mcp-Tenant',
+
+    /*
+    |--------------------------------------------------------------------------
     | Server identity
     |--------------------------------------------------------------------------
     */
@@ -43,7 +63,7 @@ return [
     'server' => [
         'name' => env('FILAMENT_MCP_NAME', 'Filament MCP'),
         'instructions' => 'Manage application content through the configured Filament resources. '
-            . 'Each resource exposes list, get, create, update, and delete tools. '
+            . 'Each resource exposes tools according to its Filament pages and MCP resource config. '
             . 'Only text-like fields are supported; file uploads and custom components are not exposed.',
     ],
 
@@ -66,7 +86,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | The Filament resources you want to expose, and which abilities to enable
-    | for each. The shorthand form (a bare class string) enables every ability:
+    | for each. Built-in tools are only generated when matching Filament pages
+    | exist. The shorthand form (a bare class string) enables list/get,
+    | create, and update where those pages exist. Delete is always opt-in:
     |
     |     \App\Filament\Resources\PostResource::class,
     |

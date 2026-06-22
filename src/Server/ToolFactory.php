@@ -2,6 +2,7 @@
 
 namespace Mattiasgeniar\FilamentMcp\Server;
 
+use Filament\Resources\Resource;
 use InvalidArgumentException;
 use Laravel\Mcp\Server\Tool;
 use Mattiasgeniar\FilamentMcp\Actions\ResourceAction;
@@ -39,7 +40,7 @@ class ToolFactory
         foreach ($this->resources() as $resourceClass => $abilities) {
             $schema = $this->introspector->for($resourceClass, $abilities['read_fields'] ?? []);
             $prepare = $this->resolvePrepare($abilities['prepare'] ?? null);
-            $operations = $this->operations($abilities);
+            $operations = $this->operations($resourceClass, $abilities);
 
             if ($operations['read']) {
                 $tools[] = $this->tool(ListRecordsTool::class, $schema, $prepare);
@@ -89,7 +90,7 @@ class ToolFactory
 
             $described[] = [
                 'resource' => $schema->singularName(),
-                'operations' => $this->operations($abilities),
+                'operations' => $this->operations($resourceClass, $abilities),
                 'actions' => array_keys($actions),
                 'readable_fields' => $schema->readableFields->map(fn (ReadableField $field): string => $field->name)->values()->all(),
                 'writable_fields' => $schema->fields->map(fn (FieldDefinition $field): string => $field->name)->values()->all(),
@@ -100,7 +101,7 @@ class ToolFactory
     }
 
     /**
-     * @return array<class-string, array<string, mixed>>
+     * @return array<class-string<\Filament\Resources\Resource>, array<string, mixed>>
      */
     private function resources(): array
     {
@@ -118,19 +119,49 @@ class ToolFactory
     }
 
     /**
+     * @param  class-string<\Filament\Resources\Resource>  $resourceClass
      * @param  array<string, mixed>  $abilities
      * @return array{read: bool, create: bool, update: bool, delete: bool}
      */
-    private function operations(array $abilities): array
+    private function operations(string $resourceClass, array $abilities): array
     {
         $write = $abilities['write'] ?? null;
+        $surface = $this->resourceSurface($resourceClass);
 
         return [
-            'read' => (bool) ($abilities['read'] ?? true),
-            'create' => (bool) ($abilities['create'] ?? ($write ?? true)),
-            'update' => (bool) ($abilities['update'] ?? ($write ?? true)),
-            'delete' => (bool) ($abilities['delete'] ?? ($write ?? true)),
+            'read' => (bool) ($abilities['read'] ?? true) && $surface['read'],
+            'create' => (bool) ($abilities['create'] ?? ($write ?? true)) && $surface['create'],
+            'update' => (bool) ($abilities['update'] ?? ($write ?? true)) && $surface['update'],
+            'delete' => (bool) ($abilities['delete'] ?? false) && $surface['delete'],
         ];
+    }
+
+    /**
+     * Infer the dashboard surface exposed by Filament's resource pages. Destructive
+     * deletes still require an explicit filament-mcp opt-in in operations().
+     *
+     * @param  class-string<\Filament\Resources\Resource>  $resourceClass
+     * @return array{read: bool, create: bool, update: bool, delete: bool}
+     */
+    private function resourceSurface(string $resourceClass): array
+    {
+        $pages = array_keys($resourceClass::getPages());
+
+        return [
+            'read' => $this->hasAnyPage($pages, ['index', 'manage']),
+            'create' => $this->hasAnyPage($pages, ['create', 'manage']),
+            'update' => $this->hasAnyPage($pages, ['edit', 'manage']),
+            'delete' => $this->hasAnyPage($pages, ['index', 'edit', 'manage']),
+        ];
+    }
+
+    /**
+     * @param  array<int, string>  $pages
+     * @param  array<int, string>  $needles
+     */
+    private function hasAnyPage(array $pages, array $needles): bool
+    {
+        return array_intersect($needles, $pages) !== [];
     }
 
     private function resolveAction(mixed $action): ResourceAction
@@ -151,16 +182,16 @@ class ToolFactory
     }
 
     /**
-     * @return array{0: class-string, 1: array<string, mixed>}
+     * @return array{0: class-string<\Filament\Resources\Resource>, 1: array<string, mixed>}
      */
     private function normalize(int | string $key, mixed $value): array
     {
         if (is_string($key)) {
-            /** @var class-string $key */
+            /** @var class-string<\Filament\Resources\Resource> $key */
             return [$key, is_array($value) ? $value : []];
         }
 
-        /** @var class-string $value */
+        /** @var class-string<\Filament\Resources\Resource> $value */
         return [$value, []];
     }
 

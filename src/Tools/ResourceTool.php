@@ -14,6 +14,7 @@ use Mattiasgeniar\FilamentMcp\Introspection\ReadableField;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceSchema;
 use Mattiasgeniar\FilamentMcp\Introspection\SchemaCompiler;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
+use Mattiasgeniar\FilamentMcp\Support\ModelAttributeVisibility;
 use Mattiasgeniar\FilamentMcp\Support\ResourceAuthorizer;
 use Throwable;
 
@@ -128,17 +129,16 @@ abstract class ResourceTool extends BaseTool
      */
     protected function present(Model $model): array
     {
-        $hidden = $model->getHidden();
         $data = ['id' => $model->getKey()];
 
         $this->resource->readableFields
-            ->reject(fn (ReadableField $field): bool => in_array($field->name, $hidden, true))
+            ->reject(fn (ReadableField $field): bool => ! ModelAttributeVisibility::allows($model, $field->name))
             ->each(function (ReadableField $field) use ($model, &$data): void {
                 $data[$field->name] = $this->normalize($model->getAttribute($field->name));
             });
 
         collect(['created_at', 'updated_at'])
-            ->reject(fn (string $column): bool => in_array($column, $hidden, true))
+            ->reject(fn (string $column): bool => ! ModelAttributeVisibility::allows($model, $column))
             ->each(function (string $column) use ($model, &$data): void {
                 $value = $model->getAttribute($column);
 

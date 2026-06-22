@@ -5,6 +5,7 @@ use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
 use Mattiasgeniar\FilamentMcp\Server\ToolFactory;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Article;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\UnpagedArticleResource;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\UppercasesTitle;
 
 beforeEach(function () {
@@ -21,11 +22,15 @@ it('generates the expected tool set for a resource', function () {
         'get_article',
         'create_article',
         'update_article',
-        'delete_article',
     );
+    expect($names)->not->toContain('delete_article');
 });
 
 it('runs a full create, read, update, delete round trip', function () {
+    config(['filament-mcp.resources' => [
+        ArticleResource::class => ['delete' => true],
+    ]]);
+
     $created = callMcpTool('create_article', [
         'title' => 'Hello World',
         'body' => 'Some body.',
@@ -45,6 +50,36 @@ it('runs a full create, read, update, delete round trip', function () {
     $deleted = callMcpTool('delete_article', ['id' => $id]);
     expect($deleted['success'])->toBeTrue();
     expect(Article::find($id))->toBeNull();
+});
+
+it('requires an explicit opt-in for delete tools', function () {
+    config(['filament-mcp.resources' => [
+        ArticleResource::class => ['delete' => true],
+    ]]);
+
+    $names = collect(app(ToolFactory::class)->make())
+        ->map(fn ($tool) => $tool->name())
+        ->all();
+
+    expect($names)->toContain('delete_article');
+});
+
+it('does not generate tools for resources without matching Filament pages', function () {
+    config(['filament-mcp.resources' => [
+        UnpagedArticleResource::class => ['delete' => true],
+    ]]);
+
+    $names = collect(app(ToolFactory::class)->make())
+        ->map(fn ($tool) => $tool->name())
+        ->all();
+
+    expect($names)->not->toContain(
+        'list_articles',
+        'get_article',
+        'create_article',
+        'update_article',
+        'delete_article',
+    );
 });
 
 it('fires model events on create so the slug is generated', function () {

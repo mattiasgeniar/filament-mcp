@@ -33,10 +33,13 @@ it('unions the infolist and writable form fields for readable fields', function 
     $schema = (new ResourceIntrospector)->for(ProfileResource::class);
 
     expect($schema->readableFields->map(fn ($field) => $field->name)->all())
-        ->toBe(['name', 'bio', 'secret_token']);
+        ->toBe(['name', 'bio']);
+
+    expect($schema->fields->map(fn ($field) => $field->name)->all())
+        ->toBe(['name', 'bio']);
 });
 
-it('drops $hidden attributes from read output even when they are readable fields', function () {
+it('drops $hidden attributes from read output and discovery', function () {
     config(['filament-mcp.resources' => [ProfileResource::class]]);
     actingAsMcpUser();
 
@@ -47,6 +50,18 @@ it('drops $hidden attributes from read output even when they are readable fields
     expect($fetched['name'])->toBe('Ada');
     expect($fetched['bio'])->toBe('Engineer');
     expect($fetched)->not->toHaveKey('secret_token');
+
+    $resources = callMcpTool('describe_resources', [])['resources'];
+    $profileResource = collect($resources)->firstWhere('resource', 'profile');
+
+    expect($profileResource['readable_fields'])->not->toContain('secret_token');
+    expect($profileResource['writable_fields'])->not->toContain('secret_token');
+});
+
+it('does not let read_fields override model hidden attributes', function () {
+    $schema = (new ResourceIntrospector)->for(ProfileResource::class, ['name', 'secret_token']);
+
+    expect($schema->readableFields->map(fn ($field) => $field->name)->all())->toBe(['name']);
 });
 
 it('lets config override the readable fields explicitly', function () {

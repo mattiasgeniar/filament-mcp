@@ -5,6 +5,7 @@ namespace Mattiasgeniar\FilamentMcp\Tests;
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
 use Filament\Actions\ActionsServiceProvider;
+use Filament\Facades\Filament;
 use Filament\FilamentServiceProvider;
 use Filament\Forms\FormsServiceProvider;
 use Filament\Infolists\InfolistsServiceProvider;
@@ -18,6 +19,7 @@ use Livewire\LivewireServiceProvider;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\FilamentMcpServiceProvider;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\User;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Providers\TenantPanelProvider;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Providers\TestPanelProvider;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource;
 use Orchestra\Testbench\TestCase as Orchestra;
@@ -32,6 +34,8 @@ class TestCase extends Orchestra
         parent::setUp();
 
         FilamentMcp::flushAuthorization();
+        Filament::setCurrentPanel(null);
+        Filament::setTenant(null, isQuiet: true);
     }
 
     protected function getPackageProviders($app): array
@@ -52,6 +56,7 @@ class TestCase extends Orchestra
             WidgetsServiceProvider::class,
             FilamentMcpServiceProvider::class,
             TestPanelProvider::class,
+            TenantPanelProvider::class,
         ];
     }
 
