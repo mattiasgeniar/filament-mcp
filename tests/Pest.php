@@ -32,11 +32,10 @@ function actingAsMcpUser(?User $user = null): User
  */
 function actingAsMcpToken(?User $user = null, string $name = 'Test token'): array
 {
-    $user ??= makeUser();
+    $user = actingAsMcpUser($user);
 
     ['token' => $token] = FilamentMcpToken::issue($user, $name);
 
-    request()->setUserResolver(fn () => $user);
     request()->attributes->set(FilamentMcpToken::REQUEST_ATTRIBUTE, $token);
 
     return ['user' => $user, 'token' => $token];

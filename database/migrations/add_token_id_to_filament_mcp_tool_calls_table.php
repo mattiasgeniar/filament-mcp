@@ -25,6 +25,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasTable('filament_mcp_tool_calls')) {
+            return;
+        }
+
         if (! Schema::hasColumn('filament_mcp_tool_calls', 'filament_mcp_token_id')) {
             return;
         }

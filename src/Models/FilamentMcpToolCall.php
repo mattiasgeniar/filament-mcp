@@ -44,10 +44,4 @@ class FilamentMcpToolCall extends Model
     {
         return $this->belongsTo(FilamentMcpToken::userModel(), 'user_id');
     }
-
-    /** @return BelongsTo<FilamentMcpToken, $this> */
-    public function token(): BelongsTo
-    {
-        return $this->belongsTo(FilamentMcpToken::class, 'filament_mcp_token_id');
-    }
 }

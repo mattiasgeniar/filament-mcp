@@ -7,7 +7,7 @@ All notable changes to `filament-mcp` will be documented in this file.
 ### Added
 
 - Tool calls are now attributed to the token that authenticated them (new nullable `filament_mcp_token_id` column on `filament_mcp_tool_calls`), not just to the user.
-- An **Activity** action on each row of the token page opens that token's 50 most recent tool calls (name, success, duration, arguments). Scoped to your own tokens.
+- An **Activity** action on each token opens a dedicated, paginated page listing that token's tool calls newest-first (status, tool, duration, time), with each call's arguments behind a modal. Scoped to your own tokens.
 
 ## 0.0.5 - 2026-06-22
 

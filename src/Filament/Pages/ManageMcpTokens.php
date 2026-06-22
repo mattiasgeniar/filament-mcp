@@ -16,11 +16,9 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
-use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
 use UnitEnum;
 
 class ManageMcpTokens extends Page implements HasTable
@@ -118,12 +116,7 @@ class ManageMcpTokens extends Page implements HasTable
                     ->label('Activity')
                     ->icon('heroicon-m-list-bullet')
                     ->color('gray')
-                    ->modalHeading(fn (FilamentMcpToken $record): string => "Activity for {$record->name}")
-                    ->modalContent(fn (FilamentMcpToken $record): View => app(ViewFactory::class)->make('filament-mcp::filament.modals.token-activity', [
-                        'calls' => $this->tokenActivity($record),
-                    ]))
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close'),
+                    ->url(fn (FilamentMcpToken $record): string => TokenActivity::getUrl(['tokenId' => $record->getKey()])),
                 Action::make('revoke')
                     ->icon('heroicon-m-x-mark')
                     ->color('danger')
@@ -192,26 +185,6 @@ class ManageMcpTokens extends Page implements HasTable
     public function revokedTokenCount(): int
     {
         return $this->ownTokensQuery('revoked')->count();
-    }
-
-    /**
-     * @return Collection<int, FilamentMcpToolCall>
-     */
-    public function tokenActivity(FilamentMcpToken $token): Collection
-    {
-        abort_unless(
-            FilamentMcpToken::query()
-                ->forUser($this->currentUser())
-                ->whereKey($token->getKey())
-                ->exists(),
-            403,
-        );
-
-        return FilamentMcpToolCall::query()
-            ->where('filament_mcp_token_id', $token->getKey())
-            ->latest('id')
-            ->limit(50)
-            ->get();
     }
 
     /**
