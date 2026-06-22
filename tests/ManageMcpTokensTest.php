@@ -68,3 +68,42 @@ it('revokes a token by stamping revoked_at', function () {
 
     expect($token->fresh()->revoked_at)->not->toBeNull();
 });
+
+it('splits the token table into active and revoked tabs', function () {
+    $user = makeUser();
+    ['token' => $active] = FilamentMcpToken::issue($user, 'Active one');
+    ['token' => $revoked] = FilamentMcpToken::issue($user, 'Revoked one');
+    $revoked->revoke();
+
+    $this->actingAs($user);
+
+    $page = tokenPage();
+
+    expect($page->exposeQuery()->pluck('id')->all())->toBe([$active->id])
+        ->and($page->activeTokenCount())->toBe(1)
+        ->and($page->revokedTokenCount())->toBe(1);
+
+    $page->activeTokenTab = 'revoked';
+
+    expect($page->exposeQuery()->pluck('id')->all())->toBe([$revoked->id]);
+});
+
+it('builds the setup-guide endpoint url from the configured path', function () {
+    config(['filament-mcp.path' => 'custom/mcp']);
+
+    expect(tokenPage()->mcpEndpointUrl())->toBe(url('custom/mcp'));
+});
+
+it('derives a slugged server key from the server name', function () {
+    config(['filament-mcp.server.name' => 'My Cool App']);
+
+    expect(tokenPage()->mcpServerKey())->toBe('my-cool-app');
+});
+
+it('shows the setup guide by default and hides it when disabled', function () {
+    expect(tokenPage()->showSetupGuide())->toBeTrue();
+
+    config(['filament-mcp.ui.show_setup_guide' => false]);
+
+    expect(tokenPage()->showSetupGuide())->toBeFalse();
+});

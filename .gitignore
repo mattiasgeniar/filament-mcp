@@ -2,6 +2,7 @@
 .idea
 .phpunit.result.cache
 .phpunit.cache
+CLAUDE.md
 .vscode
 build
 coverage
