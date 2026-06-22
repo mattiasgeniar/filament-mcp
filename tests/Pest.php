@@ -2,6 +2,7 @@
 
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Server\Tool;
+use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
 use Mattiasgeniar\FilamentMcp\Server\ToolFactory;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\User;
 use Mattiasgeniar\FilamentMcp\Tests\TestCase;
@@ -24,6 +25,21 @@ function actingAsMcpUser(?User $user = null): User
     request()->setUserResolver(fn () => $user);
 
     return $user;
+}
+
+/**
+ * @return array{user: User, token: FilamentMcpToken}
+ */
+function actingAsMcpToken(?User $user = null, string $name = 'Test token'): array
+{
+    $user ??= makeUser();
+
+    ['token' => $token] = FilamentMcpToken::issue($user, $name);
+
+    request()->setUserResolver(fn () => $user);
+    request()->attributes->set(FilamentMcpToken::REQUEST_ATTRIBUTE, $token);
+
+    return ['user' => $user, 'token' => $token];
 }
 
 function mcpTool(string $name): Tool

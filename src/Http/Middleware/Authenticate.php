@@ -37,6 +37,7 @@ class Authenticate
         }
 
         $request->setUserResolver(fn () => $user);
+        $request->attributes->set(FilamentMcpToken::REQUEST_ATTRIBUTE, $token);
         Auth::setUser($user);
 
         $contextError = app(FilamentContext::class)->initialize($request, $user);

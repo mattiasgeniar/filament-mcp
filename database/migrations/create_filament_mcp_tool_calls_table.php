@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('filament_mcp_tool_calls', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('filament_mcp_token_id')->nullable();
             $table->string('tool_name');
             $table->json('arguments')->nullable();
             $table->boolean('success')->default(true);
@@ -18,6 +19,7 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
 
             $table->index(['user_id', 'created_at']);
+            $table->index(['filament_mcp_token_id', 'created_at']);
         });
     }
 

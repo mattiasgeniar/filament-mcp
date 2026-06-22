@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int|null $user_id
+ * @property int|null $filament_mcp_token_id
  * @property string $tool_name
  * @property array<string, mixed>|null $arguments
  * @property bool $success
@@ -21,6 +22,7 @@ class FilamentMcpToolCall extends Model
 
     protected $fillable = [
         'user_id',
+        'filament_mcp_token_id',
         'tool_name',
         'arguments',
         'success',
@@ -41,5 +43,11 @@ class FilamentMcpToolCall extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(FilamentMcpToken::userModel(), 'user_id');
+    }
+
+    /** @return BelongsTo<FilamentMcpToken, $this> */
+    public function token(): BelongsTo
+    {
+        return $this->belongsTo(FilamentMcpToken::class, 'filament_mcp_token_id');
     }
 }

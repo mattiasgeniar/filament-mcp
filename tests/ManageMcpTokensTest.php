@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Mattiasgeniar\FilamentMcp\Filament\Pages\ManageMcpTokens;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
+use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /*
  * The page's Livewire rendering is exercised end-to-end against a real Filament
@@ -87,6 +89,55 @@ it('splits the token table into active and revoked tabs', function () {
 
     expect($page->exposeQuery()->pluck('id')->all())->toBe([$revoked->id]);
 });
+
+it('lists a token\'s own tool calls newest first', function () {
+    $user = makeUser();
+    ['token' => $token] = FilamentMcpToken::issue($user, 'Mine');
+
+    FilamentMcpToolCall::query()->create([
+        'user_id' => $user->id,
+        'filament_mcp_token_id' => $token->id,
+        'tool_name' => 'older_call',
+        'created_at' => now()->subMinute(),
+    ]);
+    FilamentMcpToolCall::query()->create([
+        'user_id' => $user->id,
+        'filament_mcp_token_id' => $token->id,
+        'tool_name' => 'newer_call',
+        'created_at' => now(),
+    ]);
+
+    $this->actingAs($user);
+
+    expect(tokenPage()->tokenActivity($token)->pluck('tool_name')->all())
+        ->toBe(['newer_call', 'older_call']);
+});
+
+it('excludes tool calls made with a different token', function () {
+    $user = makeUser();
+    ['token' => $token] = FilamentMcpToken::issue($user, 'Mine');
+    ['token' => $otherToken] = FilamentMcpToken::issue($user, 'Other');
+
+    FilamentMcpToolCall::query()->create([
+        'user_id' => $user->id,
+        'filament_mcp_token_id' => $otherToken->id,
+        'tool_name' => 'other_token_call',
+        'created_at' => now(),
+    ]);
+
+    $this->actingAs($user);
+
+    expect(tokenPage()->tokenActivity($token))->toBeEmpty();
+});
+
+it('refuses to show activity for another user\'s token', function () {
+    $other = makeUser();
+    ['token' => $theirs] = FilamentMcpToken::issue($other, 'Theirs');
+
+    $this->actingAs(makeUser());
+
+    tokenPage()->tokenActivity($theirs);
+})->throws(HttpException::class);
 
 it('builds the setup-guide endpoint url from the configured path', function () {
     config(['filament-mcp.path' => 'custom/mcp']);

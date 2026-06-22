@@ -24,6 +24,12 @@ use Mattiasgeniar\FilamentMcp\FilamentMcp;
  */
 class FilamentMcpToken extends Model
 {
+    /**
+     * Request attribute the authenticated token is stashed under, so the audit
+     * recorder can attribute each tool call to the token that authenticated it.
+     */
+    public const REQUEST_ATTRIBUTE = 'filament_mcp_token';
+
     protected $fillable = [
         'tokenable_id',
         'tokenable_type',

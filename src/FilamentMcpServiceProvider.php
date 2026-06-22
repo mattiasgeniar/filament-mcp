@@ -24,6 +24,7 @@ class FilamentMcpServiceProvider extends PackageServiceProvider
                 'create_filament_mcp_tool_calls_table',
                 'add_tokenable_to_filament_mcp_tokens_table',
                 'make_filament_mcp_tokens_user_id_nullable',
+                'add_token_id_to_filament_mcp_tool_calls_table',
             ])
             ->runsMigrations()
             ->hasCommand(IssueTokenCommand::class)
