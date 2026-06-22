@@ -24,6 +24,8 @@ return new class extends Migration
             return;
         }
 
+        $this->makeLegacyUserIdNullable();
+
         $userModel = FilamentMcpToken::userModel();
 
         DB::table('filament_mcp_tokens')
@@ -40,6 +42,20 @@ return new class extends Migration
                         ]);
                 }
             });
+    }
+
+    private function makeLegacyUserIdNullable(): void
+    {
+        $userId = collect(Schema::getColumns('filament_mcp_tokens'))
+            ->firstWhere('name', 'user_id');
+
+        if (($userId['nullable'] ?? true) === true) {
+            return;
+        }
+
+        Schema::table('filament_mcp_tokens', function (Blueprint $table): void {
+            $table->foreignId('user_id')->nullable()->change();
+        });
     }
 
     public function down(): void
