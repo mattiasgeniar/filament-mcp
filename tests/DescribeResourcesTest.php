@@ -13,7 +13,7 @@ it('describes the exposed resources, operations, and fields', function () {
         'read' => true,
         'create' => true,
         'update' => true,
-        'delete' => true,
+        'delete' => false,
     ]);
     expect($article['writable_fields'])->toContain('title', 'body', 'status');
     expect($article['readable_fields'])->toContain('title');

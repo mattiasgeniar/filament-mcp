@@ -63,7 +63,7 @@ return [
     'server' => [
         'name' => env('FILAMENT_MCP_NAME', 'Filament MCP'),
         'instructions' => 'Manage application content through the configured Filament resources. '
-            . 'Each resource exposes list, get, create, update, and delete tools. '
+            . 'Each resource exposes tools according to its Filament pages and MCP resource config. '
             . 'Only text-like fields are supported; file uploads and custom components are not exposed.',
     ],
 
@@ -86,7 +86,9 @@ return [
     |--------------------------------------------------------------------------
     |
     | The Filament resources you want to expose, and which abilities to enable
-    | for each. The shorthand form (a bare class string) enables every ability:
+    | for each. Built-in tools are only generated when matching Filament pages
+    | exist. The shorthand form (a bare class string) enables list/get,
+    | create, and update where those pages exist. Delete is always opt-in:
     |
     |     \App\Filament\Resources\PostResource::class,
     |

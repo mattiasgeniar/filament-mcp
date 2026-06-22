@@ -7,6 +7,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Profile;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ProfileResource\Pages;
 
 class ProfileResource extends Resource
 {
@@ -30,6 +31,8 @@ class ProfileResource extends Resource
 
     public static function getPages(): array
     {
-        return [];
+        return [
+            'index' => Pages\ListProfiles::route('/'),
+        ];
     }
 }

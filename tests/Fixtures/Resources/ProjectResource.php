@@ -6,6 +6,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Project;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ProjectResource\Pages;
 
 class ProjectResource extends Resource
 {
@@ -20,6 +21,8 @@ class ProjectResource extends Resource
 
     public static function getPages(): array
     {
-        return [];
+        return [
+            'index' => Pages\ListProjects::route('/'),
+        ];
     }
 }

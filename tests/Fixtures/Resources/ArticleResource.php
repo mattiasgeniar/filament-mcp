@@ -11,6 +11,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Article;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource\Pages;
 
 class ArticleResource extends Resource
 {
@@ -38,6 +39,10 @@ class ArticleResource extends Resource
 
     public static function getPages(): array
     {
-        return [];
+        return [
+            'index' => Pages\ListArticles::route('/'),
+            'create' => Pages\CreateArticle::route('/create'),
+            'edit' => Pages\EditArticle::route('/{record}/edit'),
+        ];
     }
 }
