@@ -42,8 +42,11 @@ class ToolFactory
             $prepare = $this->resolvePrepare($abilities['prepare'] ?? null);
             $operations = $this->operations($resourceClass, $abilities);
 
-            if ($operations['read']) {
+            if ($operations['list']) {
                 $tools[] = $this->tool(ListRecordsTool::class, $schema, $prepare);
+            }
+
+            if ($operations['read']) {
                 $tools[] = $this->tool(GetRecordTool::class, $schema, $prepare);
             }
 
@@ -121,7 +124,7 @@ class ToolFactory
     /**
      * @param  class-string<\Filament\Resources\Resource>  $resourceClass
      * @param  array<string, mixed>  $abilities
-     * @return array{read: bool, create: bool, update: bool, delete: bool}
+     * @return array{read: bool, list: bool, create: bool, update: bool, delete: bool}
      */
     private function operations(string $resourceClass, array $abilities): array
     {
@@ -130,6 +133,7 @@ class ToolFactory
 
         return [
             'read' => (bool) ($abilities['read'] ?? true) && $surface['read'],
+            'list' => (bool) ($abilities['list'] ?? $abilities['read'] ?? true) && $surface['list'],
             'create' => (bool) ($abilities['create'] ?? ($write ?? true)) && $surface['create'],
             'update' => (bool) ($abilities['update'] ?? ($write ?? true)) && $surface['update'],
             'delete' => (bool) ($abilities['delete'] ?? false) && $surface['delete'],
@@ -141,14 +145,15 @@ class ToolFactory
      * deletes still require an explicit filament-mcp opt-in in operations().
      *
      * @param  class-string<\Filament\Resources\Resource>  $resourceClass
-     * @return array{read: bool, create: bool, update: bool, delete: bool}
+     * @return array{read: bool, list: bool, create: bool, update: bool, delete: bool}
      */
     private function resourceSurface(string $resourceClass): array
     {
         $pages = array_keys($resourceClass::getPages());
 
         return [
-            'read' => $this->hasAnyPage($pages, ['index', 'manage']),
+            'read' => $this->hasAnyPage($pages, ['view', 'index', 'manage']),
+            'list' => $this->hasAnyPage($pages, ['index', 'manage']),
             'create' => $this->hasAnyPage($pages, ['create', 'manage']),
             'update' => $this->hasAnyPage($pages, ['edit', 'manage']),
             'delete' => $this->hasAnyPage($pages, ['index', 'edit', 'manage']),
