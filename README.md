@@ -189,7 +189,8 @@ public function rules(): array
 
 ## Issuing a token
 
-Tokens are hashed before storage and shown only once. Generate one from the CLI:
+Tokens are bound to the issuing Filament user model, hashed before storage, and
+shown only once. Generate one from the CLI:
 
 ```bash
 php artisan filament-mcp:token user@example.com --name="My laptop"

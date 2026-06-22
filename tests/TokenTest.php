@@ -2,6 +2,7 @@
 
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\AdminUser;
 
 it('issues a hashed, prefixed token and resolves it from the plaintext', function () {
     $user = makeUser();
@@ -11,6 +12,23 @@ it('issues a hashed, prefixed token and resolves it from the plaintext', functio
     expect($plainText)->toStartWith('fmcp_');
     expect($token->token)->toBe(hash('sha256', $plainText));
     expect(FilamentMcpToken::findByPlainText($plainText)?->is($token))->toBeTrue();
+    expect($token->user?->is($user))->toBeTrue();
+    expect($token->tokenable_type)->toBe($user->getMorphClass());
+});
+
+it('binds tokens to the issuing authenticatable model, not just a numeric id', function () {
+    $user = makeUser();
+    $admin = AdminUser::query()->create([
+        'id' => $user->getKey(),
+        'name' => 'Admin',
+        'email' => 'admin@example.com',
+    ]);
+
+    ['plainText' => $userPlainText] = FilamentMcpToken::issue($user, 'User token');
+    ['plainText' => $adminPlainText] = FilamentMcpToken::issue($admin, 'Admin token');
+
+    expect(FilamentMcpToken::findByPlainText($userPlainText)?->user?->is($user))->toBeTrue();
+    expect(FilamentMcpToken::findByPlainText($adminPlainText)?->user?->is($admin))->toBeTrue();
 });
 
 it('does not resolve a revoked token', function () {

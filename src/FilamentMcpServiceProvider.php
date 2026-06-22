@@ -22,6 +22,7 @@ class FilamentMcpServiceProvider extends PackageServiceProvider
             ->hasMigrations([
                 'create_filament_mcp_tokens_table',
                 'create_filament_mcp_tool_calls_table',
+                'add_tokenable_to_filament_mcp_tokens_table',
             ])
             ->runsMigrations()
             ->hasCommand(IssueTokenCommand::class)

@@ -3,16 +3,19 @@
 namespace Mattiasgeniar\FilamentMcp\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Auth\User as DefaultUser;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 
 /**
  * @property int $id
- * @property int $user_id
+ * @property int|string $tokenable_id
+ * @property class-string<Model>|string $tokenable_type
  * @property string $name
  * @property string $token
  * @property Carbon|null $last_used_at
@@ -22,7 +25,8 @@ use Mattiasgeniar\FilamentMcp\FilamentMcp;
 class FilamentMcpToken extends Model
 {
     protected $fillable = [
-        'user_id',
+        'tokenable_id',
+        'tokenable_type',
         'name',
         'token',
         'last_used_at',
@@ -48,7 +52,7 @@ class FilamentMcpToken extends Model
         $plainText = FilamentMcp::tokenPrefix() . Str::random(48);
 
         $token = static::query()->create([
-            'user_id' => $user->getAuthIdentifier(),
+            ...self::tokenableAttributes($user),
             'name' => $name,
             'token' => static::hash($plainText),
         ]);
@@ -73,6 +77,15 @@ class FilamentMcpToken extends Model
         return hash('sha256', $plainText);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeForUser(Builder $query, Authenticatable $user): Builder
+    {
+        return $query->where(self::tokenableAttributes($user));
+    }
+
     public function revoke(): void
     {
         if ($this->revoked_at !== null) {
@@ -91,10 +104,10 @@ class FilamentMcpToken extends Model
         static::query()->whereKey($this->getKey())->update(['last_used_at' => now()]);
     }
 
-    /** @return BelongsTo<Model, $this> */
-    public function user(): BelongsTo
+    /** @return MorphTo<Model, $this> */
+    public function user(): MorphTo
     {
-        return $this->belongsTo(static::userModel(), 'user_id');
+        return $this->morphTo('tokenable', 'tokenable_type', 'tokenable_id');
     }
 
     /**
@@ -106,5 +119,20 @@ class FilamentMcpToken extends Model
         $model = config('auth.providers.users.model', DefaultUser::class);
 
         return $model;
+    }
+
+    /**
+     * @return array{tokenable_type: string, tokenable_id: int|string|null}
+     */
+    private static function tokenableAttributes(Authenticatable $user): array
+    {
+        if (! $user instanceof Model) {
+            throw new InvalidArgumentException('Filament MCP tokens can only be issued for Eloquent authenticatable models.');
+        }
+
+        return [
+            'tokenable_type' => $user->getMorphClass(),
+            'tokenable_id' => $user->getAuthIdentifier(),
+        ];
     }
 }

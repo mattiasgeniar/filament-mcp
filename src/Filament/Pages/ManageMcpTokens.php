@@ -159,7 +159,7 @@ class ManageMcpTokens extends Page implements HasTable
     protected function ownTokensQuery(): Builder
     {
         return FilamentMcpToken::query()
-            ->where('user_id', $this->currentUser()->getAuthIdentifier());
+            ->forUser($this->currentUser());
     }
 
     protected function currentUser(): Authenticatable
