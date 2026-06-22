@@ -4,8 +4,10 @@ use Illuminate\Validation\ValidationException;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
 use Mattiasgeniar\FilamentMcp\Server\ToolFactory;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Article;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Models\Report;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\UnpagedArticleResource;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ViewOnlyReportResource;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\UppercasesTitle;
 
 beforeEach(function () {
@@ -80,6 +82,28 @@ it('does not generate tools for resources without matching Filament pages', func
         'update_article',
         'delete_article',
     );
+});
+
+it('exposes a get tool but no list tool for a view-only resource', function () {
+    config(['filament-mcp.resources' => [ViewOnlyReportResource::class]]);
+
+    $names = collect(app(ToolFactory::class)->make())
+        ->map(fn ($tool) => $tool->name())
+        ->all();
+
+    expect($names)->toContain('get_report');
+    expect($names)->not->toContain('list_reports');
+});
+
+it('fetches a single record through the get tool on a view-only resource', function () {
+    config(['filament-mcp.resources' => [ViewOnlyReportResource::class]]);
+
+    $report = Report::query()->create(['title' => 'Run 48715538872', 'summary' => 'succeeded']);
+
+    $fetched = callMcpTool('get_report', ['id' => $report->id]);
+
+    expect($fetched['title'])->toBe('Run 48715538872');
+    expect($fetched['summary'])->toBe('succeeded');
 });
 
 it('fires model events on create so the slug is generated', function () {
