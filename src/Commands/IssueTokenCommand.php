@@ -22,7 +22,7 @@ class IssueTokenCommand extends Command
     {
         $identifier = $this->argument('user');
 
-        $user = is_string($identifier) ? $this->resolveUser($identifier) : null;
+        $user = $this->resolveUser($identifier);
 
         if ($user === null) {
             $this->error('No user found for that id or email.');
