@@ -3,7 +3,6 @@
 namespace Mattiasgeniar\FilamentMcp\Filament\Pages;
 
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\Page;
 use Filament\Panel;
@@ -12,15 +11,16 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Mattiasgeniar\FilamentMcp\Filament\Concerns\ResolvesPanelUser;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
 
 class TokenActivity extends Page implements HasTable
 {
     use InteractsWithTable;
+    use ResolvesPanelUser;
 
     protected string $view = 'filament-mcp::filament.pages.token-activity';
 
@@ -52,7 +52,7 @@ class TokenActivity extends Page implements HasTable
 
     public function getTitle(): string | Htmlable
     {
-        return 'Activity for ' . $this->token->name;
+        return "Activity for {$this->token->name}";
     }
 
     public function table(Table $table): Table
@@ -70,8 +70,8 @@ class TokenActivity extends Page implements HasTable
                     ->searchable(),
                 TextColumn::make('duration_ms')
                     ->label('Duration')
-                    ->placeholder('—')
-                    ->formatStateUsing(fn (?int $state): ?string => $state === null ? null : "{$state} ms"),
+                    ->suffix(' ms')
+                    ->placeholder('—'),
                 TextColumn::make('created_at')
                     ->label('When')
                     ->dateTime()
@@ -93,16 +93,14 @@ class TokenActivity extends Page implements HasTable
                         TextEntry::make('duration_ms')
                             ->label('Duration')
                             ->suffix(' ms')
-                            ->placeholder('Unknown'),
+                            ->placeholder('—'),
                         TextEntry::make('created_at')
                             ->label('Time')
                             ->dateTime(),
                         TextEntry::make('arguments')
                             ->placeholder('No arguments')
                             ->html()
-                            ->state(fn (FilamentMcpToolCall $record): string => filled($record->arguments)
-                                ? '<pre class="overflow-x-auto rounded-lg bg-gray-50 p-4 text-xs text-gray-700 dark:bg-white/5 dark:text-gray-300">' . e(json_encode($record->arguments, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)) . '</pre>'
-                                : ''),
+                            ->state(fn (FilamentMcpToolCall $record): string => $this->formatArguments($record)),
                     ])
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
@@ -129,17 +127,21 @@ class TokenActivity extends Page implements HasTable
     protected function toolCallsQuery(): Builder
     {
         return FilamentMcpToolCall::query()
-            ->where('filament_mcp_token_id', $this->token->getKey())
-            ->latest('created_at')
-            ->latest('id');
+            ->where('filament_mcp_token_id', $this->token->getKey());
     }
 
-    protected function currentUser(): Authenticatable
+    protected function formatArguments(FilamentMcpToolCall $call): string
     {
-        $user = Filament::auth()->user();
+        if (blank($call->arguments)) {
+            return '';
+        }
 
-        abort_unless($user instanceof Authenticatable, 403);
+        $json = json_encode($call->arguments, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-        return $user;
+        if ($json === false) {
+            $json = 'Unable to display arguments.';
+        }
+
+        return '<pre class="overflow-x-auto rounded-lg bg-gray-50 p-4 text-xs text-gray-700 dark:bg-white/5 dark:text-gray-300">' . e($json) . '</pre>';
     }
 }

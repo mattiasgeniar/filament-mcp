@@ -35,6 +35,7 @@ class FilamentMcpToolCall extends Model
         return [
             'arguments' => 'array',
             'success' => 'boolean',
+            'duration_ms' => 'integer',
             'created_at' => 'datetime',
         ];
     }

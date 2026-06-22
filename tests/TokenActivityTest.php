@@ -3,6 +3,7 @@
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Carbon;
 use Mattiasgeniar\FilamentMcp\Filament\Pages\TokenActivity;
 use Mattiasgeniar\FilamentMcp\FilamentMcp;
 use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToken;
@@ -26,7 +27,7 @@ function activityPage(): TokenActivity
     };
 }
 
-function recordCall(FilamentMcpToken $token, string $name, $createdAt): FilamentMcpToolCall
+function recordCall(FilamentMcpToken $token, string $name, Carbon $createdAt): FilamentMcpToolCall
 {
     return FilamentMcpToolCall::query()->create([
         'user_id' => $token->tokenable_id,
@@ -53,7 +54,7 @@ it('hides the page from a user the authorization gate rejects', function () {
     expect(TokenActivity::canAccess())->toBeFalse();
 });
 
-it('lists the token\'s tool calls newest first', function () {
+it('lists the token\'s own tool calls', function () {
     $user = makeUser();
     ['token' => $token] = FilamentMcpToken::issue($user, 'Mine');
 
@@ -66,7 +67,7 @@ it('lists the token\'s tool calls newest first', function () {
     $page->mount($token->id);
 
     expect($page->exposeQuery()->pluck('tool_name')->all())
-        ->toBe(['newer_call', 'older_call']);
+        ->toEqualCanonicalizing(['newer_call', 'older_call']);
 });
 
 it('excludes tool calls made with a different token', function () {
