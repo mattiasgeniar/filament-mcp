@@ -319,6 +319,13 @@ an operation in the resource config overrides it. Set `'list' => true` to expose
 high-volume models like runs), or `'list' => false` to hide it where an index
 page exists. Policies, query scoping, and attribute visibility still apply.
 
+This override is per operation and wins over the broader defaults too. An
+explicit `'create' => true` or `'update' => true` re-enables that tool even when
+`'write' => false` is set, and `'delete' => true` force-exposes `delete_*` on a
+resource with no deletion page. The override only decides whether the tool is
+generated; every call still runs the model's Filament policy per record, so a
+force-exposed destructive tool is not an authorization bypass.
+
 A single `describe_resources` tool lets an agent discover what is exposed
 (resources, operations, actions, and fields) in one call.
 
