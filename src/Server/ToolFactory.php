@@ -132,17 +132,36 @@ class ToolFactory
         $surface = $this->resourceSurface($resourceClass);
 
         return [
-            'read' => (bool) ($abilities['read'] ?? true) && $surface['read'],
-            'list' => (bool) ($abilities['list'] ?? $abilities['read'] ?? true) && $surface['list'],
-            'create' => (bool) ($abilities['create'] ?? ($write ?? true)) && $surface['create'],
-            'update' => (bool) ($abilities['update'] ?? ($write ?? true)) && $surface['update'],
-            'delete' => (bool) ($abilities['delete'] ?? false) && $surface['delete'],
+            'read' => $this->resolveOperation($abilities, 'read', true, $surface['read']),
+            'list' => $this->resolveOperation($abilities, 'list', (bool) ($abilities['read'] ?? true), $surface['list']),
+            'create' => $this->resolveOperation($abilities, 'create', $write ?? true, $surface['create']),
+            'update' => $this->resolveOperation($abilities, 'update', $write ?? true, $surface['update']),
+            'delete' => $this->resolveOperation($abilities, 'delete', false, $surface['delete']),
         ];
     }
 
     /**
-     * Infer the dashboard surface exposed by Filament's resource pages. Destructive
-     * deletes still require an explicit filament-mcp opt-in in operations().
+     * Resolve a single operation. An explicit boolean in the resource config is
+     * an override: it force-exposes (or force-hides) the operation regardless of
+     * the inferred dashboard surface, so a view-only resource can still opt in to
+     * `list` without registering an index page. When the key is absent the
+     * default is gated by the surface, preserving the page-driven inference.
+     *
+     * @param  array<string, mixed>  $abilities
+     */
+    private function resolveOperation(array $abilities, string $operation, bool $default, bool $surface): bool
+    {
+        if (array_key_exists($operation, $abilities)) {
+            return (bool) $abilities[$operation];
+        }
+
+        return $default && $surface;
+    }
+
+    /**
+     * Infer the dashboard surface exposed by Filament's resource pages. This is the
+     * default gate for each operation; an explicit boolean in the resource config
+     * overrides it (see resolveOperation()). Delete additionally defaults to off.
      *
      * @param  class-string<\Filament\Resources\Resource>  $resourceClass
      * @return array{read: bool, list: bool, create: bool, update: bool, delete: bool}

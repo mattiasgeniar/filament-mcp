@@ -48,3 +48,31 @@ it('reports a view-only resource as readable but not listable', function () {
     expect($report['operations']['create'])->toBeFalse();
     expect($report['operations']['update'])->toBeFalse();
 });
+
+it('lets an explicit list opt-in force-expose listing on a resource without an index page', function () {
+    config(['filament-mcp.resources' => [
+        ViewOnlyReportResource::class => [
+            'list' => true,
+            'read_fields' => ['title', 'summary'],
+        ],
+    ]]);
+
+    $result = callMcpTool('describe_resources', []);
+    $report = collect($result['resources'])->firstWhere('resource', 'report');
+
+    expect($report['operations']['list'])->toBeTrue();
+    expect($report['operations']['create'])->toBeFalse();
+    expect($report['operations']['update'])->toBeFalse();
+});
+
+it('honours an explicit false override even when the dashboard surface exists', function () {
+    config(['filament-mcp.resources' => [
+        ArticleResource::class => ['list' => false],
+    ]]);
+
+    $result = callMcpTool('describe_resources', []);
+    $article = collect($result['resources'])->firstWhere('resource', 'article');
+
+    expect($article['operations']['list'])->toBeFalse();
+    expect($article['operations']['read'])->toBeTrue();
+});
