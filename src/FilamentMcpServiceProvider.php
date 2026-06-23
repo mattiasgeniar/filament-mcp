@@ -2,9 +2,11 @@
 
 namespace Mattiasgeniar\FilamentMcp;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Mcp\Facades\Mcp;
 use Mattiasgeniar\FilamentMcp\Commands\IssueTokenCommand;
 use Mattiasgeniar\FilamentMcp\Http\Middleware\Authenticate;
+use Mattiasgeniar\FilamentMcp\Models\FilamentMcpToolCall;
 use Mattiasgeniar\FilamentMcp\Server\McpServer;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -46,5 +48,19 @@ class FilamentMcpServiceProvider extends PackageServiceProvider
 
         Mcp::web($path, McpServer::class)
             ->middleware([Authenticate::class, ...$middleware]);
+
+        $this->scheduleAuditPruning();
+    }
+
+    protected function scheduleAuditPruning(): void
+    {
+        if ((int) config('filament-mcp.audit.retention_days', 365) <= 0) {
+            return;
+        }
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('model:prune', ['--model' => [FilamentMcpToolCall::class]])
+                ->daily();
+        });
     }
 }
