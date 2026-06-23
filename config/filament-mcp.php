@@ -82,6 +82,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Audit log
+    |--------------------------------------------------------------------------
+    |
+    | Every tool call is recorded in the `filament_mcp_tool_calls` table. Old
+    | entries are pruned by Laravel's `model:prune` command, which the package
+    | schedules to run daily. `retention_days` is how long a record is kept;
+    | set it to 0 (or null) to keep the audit log forever and disable pruning.
+    |
+    | Pruning only runs if your app's scheduler is running
+    | (`php artisan schedule:run` via cron, or `schedule:work` locally).
+    |
+    */
+
+    'audit' => [
+        'retention_days' => env('FILAMENT_MCP_AUDIT_RETENTION_DAYS', 365),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Exposed resources
     |--------------------------------------------------------------------------
     |

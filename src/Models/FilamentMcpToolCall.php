@@ -2,6 +2,8 @@
 
 namespace Mattiasgeniar\FilamentMcp\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -18,6 +20,8 @@ use Illuminate\Support\Carbon;
  */
 class FilamentMcpToolCall extends Model
 {
+    use MassPrunable;
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -44,5 +48,17 @@ class FilamentMcpToolCall extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(FilamentMcpToken::userModel(), 'user_id');
+    }
+
+    /** @return Builder<static> */
+    public function prunable(): Builder
+    {
+        $retentionDays = (int) config('filament-mcp.audit.retention_days', 365);
+
+        if ($retentionDays <= 0) {
+            return static::query()->whereRaw('0 = 1');
+        }
+
+        return static::query()->where('created_at', '<', now()->subDays($retentionDays));
     }
 }

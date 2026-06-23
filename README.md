@@ -186,6 +186,16 @@ public function rules(): array
 | `panel`        | `null`          | Filament panel id to run tools under.              |
 | `tenant_header` | `X-Filament-Mcp-Tenant` | Header used to select the tenant on tenant panels. |
 | `token_prefix` | `fmcp_`         | Prefix for generated tokens.                       |
+| `audit.retention_days` | `365`   | Days to keep tool-call records; `0` keeps them forever and disables pruning. |
+
+## Audit retention
+
+Every tool call is stored in `filament_mcp_tool_calls`. The package schedules
+Laravel's `model:prune` daily to delete records older than
+`audit.retention_days` (one year by default). Set
+`FILAMENT_MCP_AUDIT_RETENTION_DAYS=0` to keep the log forever and turn pruning
+off. Pruning only happens if your app's scheduler is running (`schedule:run`
+via cron, or `schedule:work` in development).
 
 ## Issuing a token
 
