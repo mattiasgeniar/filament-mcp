@@ -17,7 +17,7 @@
                 label="Copy to clipboard"
                 color="gray"
                 size="sm"
-                x-on:click="copied = true; window.navigator.clipboard.writeText(@js($code)); setTimeout(() => copied = false, 2000)"
+                :x-on:click="'copied = true; navigator.clipboard.writeText(' . \Illuminate\Support\Js::from($code) . ').catch(() => {}); setTimeout(() => copied = false, 2000)'"
             />
 
             <x-filament::icon-button
