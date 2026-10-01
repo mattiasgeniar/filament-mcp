@@ -55,9 +55,16 @@ it('sets the requested tenant before resource queries run', function () {
         'params' => [
             'name' => 'list_projects',
             'arguments' => [],
+            '_meta' => [
+                'io.modelcontextprotocol/protocolVersion' => '2026-07-28',
+                'io.modelcontextprotocol/clientCapabilities' => [],
+            ],
         ],
     ], [
         'X-Filament-Mcp-Tenant' => (string) $allowed->id,
+        'MCP-Protocol-Version' => '2026-07-28',
+        'Mcp-Method' => 'tools/call',
+        'Mcp-Name' => 'list_projects',
     ]);
 
     $response->assertStatus(200);
