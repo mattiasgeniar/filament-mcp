@@ -12,7 +12,7 @@ class McpServer extends Server
     public function createContext(): ServerContext
     {
         return new ServerContext(
-            supportedProtocolVersions: $this->supportedProtocolVersion ?: ProtocolVersion::supported(),
+            supportedProtocolVersions: $this->supportedProtocolVersion ?: ProtocolVersion::serverSupported(),
             serverCapabilities: $this->capabilities,
             implementation: new Implementation(
                 name: (string) config('filament-mcp.server.name', 'Filament MCP'),

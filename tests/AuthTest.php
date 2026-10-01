@@ -69,3 +69,27 @@ it('allows an authorized user and lists the generated tools', function () {
     $response->assertSee('create_article', escape: false);
     $response->assertSee('list_articles', escape: false);
 });
+
+it('lists tools with the current MCP protocol', function () {
+    $user = makeUser(isAdmin: true);
+    ['plainText' => $plainText] = FilamentMcpToken::issue($user, 'Test');
+
+    test()->postJson('/filament-mcp', [
+        'jsonrpc' => '2.0',
+        'id' => 1,
+        'method' => 'tools/list',
+        'params' => [
+            '_meta' => [
+                'io.modelcontextprotocol/protocolVersion' => '2026-07-28',
+                'io.modelcontextprotocol/clientCapabilities' => [],
+            ],
+        ],
+    ], [
+        'Accept' => 'application/json, text/event-stream',
+        'Authorization' => "Bearer {$plainText}",
+        'MCP-Protocol-Version' => '2026-07-28',
+        'Mcp-Method' => 'tools/list',
+    ])->assertOk()
+        ->assertSee('create_article', escape: false)
+        ->assertSee('list_articles', escape: false);
+});
