@@ -9,6 +9,10 @@ All notable changes to `filament-mcp` will be documented in this file.
 - Tool calls are now attributed to the token that authenticated them (new nullable `filament_mcp_token_id` column on `filament_mcp_tool_calls`), not just to the user.
 - An **Activity** action on each token opens a dedicated, paginated page listing that token's tool calls newest-first (status, tool, duration, time), with each call's arguments behind a modal. Scoped to your own tokens.
 
+### Fixed
+
+- Resource forms and infolists are now introspected for the resource's model. On Filament 5.11+, a form whose closures read a relationship select's state (such as `visible(fn (Get $get) => ...)`) failed with `Call to a member function hasAttribute() on null`, because Filament resolves that select's relationship to cast its state.
+
 ## 0.0.5 - 2026-06-22
 
 ### Fixed
