@@ -27,7 +27,7 @@ class ResourceIntrospector
      */
     public function for(string $resourceClass, array $readFields = []): ResourceSchema
     {
-        $schema = $resourceClass::form(Schema::make(SchemaContainer::make()));
+        $schema = $resourceClass::form(Schema::make(SchemaContainer::make())->model($resourceClass::getModel()));
 
         $fields = collect();
         $skipped = [];

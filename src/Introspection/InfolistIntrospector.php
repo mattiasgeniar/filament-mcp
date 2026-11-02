@@ -36,7 +36,7 @@ class InfolistIntrospector
      */
     public function for(string $resourceClass): Collection
     {
-        $schema = $resourceClass::infolist(Schema::make(SchemaContainer::make()));
+        $schema = $resourceClass::infolist(Schema::make(SchemaContainer::make())->model($resourceClass::getModel()));
 
         $fields = collect();
 

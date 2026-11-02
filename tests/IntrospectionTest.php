@@ -3,6 +3,7 @@
 use Mattiasgeniar\FilamentMcp\Introspection\FieldType;
 use Mattiasgeniar\FilamentMcp\Introspection\ResourceIntrospector;
 use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\ArticleResource;
+use Mattiasgeniar\FilamentMcp\Tests\Fixtures\Resources\TeamProjectResource;
 
 it('maps a resource form to typed scalar fields', function () {
     $schema = (new ResourceIntrospector)->for(ArticleResource::class);
@@ -36,4 +37,10 @@ it('skips disabled and non-dehydrated fields so the surface matches a real save'
 
     expect($names)->not->toContain('internal_ref', 'computed_value');
     expect($schema->skippedFields)->toContain('internal_ref', 'computed_value');
+});
+
+it('builds the form for the resource model, so a closure can read a relationship select', function () {
+    $schema = (new ResourceIntrospector)->for(TeamProjectResource::class);
+
+    expect($schema->fields->map(fn ($field) => $field->name)->all())->toContain('team_id', 'name');
 });
